@@ -9,12 +9,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    proxy: {
-      "/api/v1/betaAccessSignUp": {
-        target: "https://spawn-app-back-end-production.up.railway.app",
-        changeOrigin: true,
-      },
-    },
-  },
 });
