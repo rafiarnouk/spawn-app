@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -9,6 +9,10 @@ import events from "./assets/eventsgraphic.png"
 function App() {
   const [email, setEmail] = useState('')
   const [isSubscribed, setIsSubscribed] = useState(true)
+
+  useEffect(() => {
+    document.title = "Spawn - Beta Access"
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
