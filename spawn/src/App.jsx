@@ -45,7 +45,7 @@ function App() {
       <p className="mt-6 text-lg text-gray-700">
         Make every impromptu plan effortless. Stay in the loop and be the first to try <span className="text-spawn-purple">Spawn</span> when we go live! ⭐
       </p>
-      <div className="flex justify-center items-center space-x-4 mt-10">
+      <form onSubmit={handleSubmit} className="flex justify-center items-center space-x-4 mt-10">
         <Input
           className="bg-white rounded-full p-6"
           type="email"
@@ -54,10 +54,10 @@ function App() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <Button className="rounded-full p-6">
+        <Button className="rounded-full p-6" type="submit">
           Notify Me
         </Button>
-      </div>
+      </form>
       <div className="flex items-center mt-6 space-x-2">
         <Checkbox
           className="rounded-md"
