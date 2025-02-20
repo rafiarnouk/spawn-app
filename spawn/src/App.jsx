@@ -6,8 +6,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import logo from "./assets/spawnlogo.png"
 import events from "./assets/eventsgraphic.png"
 
-
 function App() {
+  const [email, setEmail] = useState('')
+  const [isSubscribed, setIsSubscribed] = useState(true)
+
   const leftsection = (
     <div className="flex-1 text-left">
       <h1 className="text-6xl font-extrabold text-gray-900">
@@ -21,13 +23,21 @@ function App() {
           className="bg-white rounded-full p-6"
           type="email"
           placeholder="Email address..."
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
         />
         <Button className="rounded-full p-6">
           Notify Me
         </Button>
       </div>
       <div className="flex items-center mt-6 space-x-2">
-        <Checkbox className="rounded-md" id="newsletter" defaultChecked />
+        <Checkbox
+          className="rounded-md"
+          id="newsletter"
+          checked={isSubscribed}
+          onChange={(e) => setIsSubscribed(e.target.checked)}
+        />
         <label
           htmlFor="newsletter"
           className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
