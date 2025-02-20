@@ -1,6 +1,8 @@
+"use client"
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import logo from "./assets/spawnlogo.png"
 import events from "./assets/eventsgraphic.png"
 
@@ -14,15 +16,24 @@ function App() {
       <p className="mt-6 text-lg text-gray-700">
         Make every impromptu plan effortless. Stay in the loop and be the first to try <span className="text-spawn-purple">Spawn</span> when we go live! ⭐
       </p>
-      <div className="flex justify-center items-center space-x-4 mt-6">
+      <div className="flex justify-center items-center space-x-4 mt-10">
         <Input
-          className="mt-6 bg-white rounded-full p-6"
+          className="bg-white rounded-full p-6"
           type="email"
           placeholder="Email address..."
         />
-        <Button className="mt-6 rounded-full p-6">
+        <Button className="rounded-full p-6">
           Notify Me
         </Button>
+      </div>
+      <div className="flex items-center mt-6 space-x-2">
+        <Checkbox className="rounded-md" id="newsletter" defaultChecked />
+        <label
+          htmlFor="newsletter"
+          className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Subscribe to our newsletter and get exclusive updates on Spawn!
+        </label>
       </div>
     </div>
   )
@@ -50,7 +61,7 @@ function App() {
   )
 
   const bggrad = {
-    background: `radial-gradient(circle at 25% 50%, #EFF1FE, #D2D7FF)`,
+    background: `radial-gradient(circle at 25% 50%, #EFF1FE, #C0C7FF)`,
   }
 
   return (
