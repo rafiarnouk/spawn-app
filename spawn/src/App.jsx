@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import Navbar from "./components/Navbar"
+import Footer from "./components/Footer"
 import events from "./assets/eventsgraphic.png"
 import StarIcon from "./assets/staricon.svg"
 
@@ -108,6 +109,7 @@ function App() {
             {herographic}
           </div>
         </div>
+        <Footer />
       </div>
     </>
   )
