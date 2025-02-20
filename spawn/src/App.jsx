@@ -10,6 +10,33 @@ function App() {
   const [email, setEmail] = useState('')
   const [isSubscribed, setIsSubscribed] = useState(true)
 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const dto = {
+      email,
+      hasSubscribedToNewsletter: isSubscribed,
+    }
+
+    try {
+      const response = await fetch('/api/v1/betaAccessSignUp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dto),
+      })
+
+      if (response.ok) {
+        alert('Successfully signed up!')
+      } else {
+        alert('Failed to sign up. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('An error occurred. Please try again.')
+    }
+  }
+
   const leftsection = (
     <div className="flex-1 text-left">
       <h1 className="text-6xl font-extrabold text-gray-900">
