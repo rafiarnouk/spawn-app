@@ -64,8 +64,9 @@ function App() {
           className="rounded-md"
           id="newsletter"
           checked={isSubscribed}
-          onChange={(e) => setIsSubscribed(e.target.checked)}
+          onCheckedChange={setIsSubscribed} 
         />
+
         <label
           htmlFor="newsletter"
           className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
