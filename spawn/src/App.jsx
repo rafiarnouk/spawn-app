@@ -6,8 +6,37 @@ import { Checkbox } from "@/components/ui/checkbox"
 import logo from "./assets/spawnlogo.png"
 import events from "./assets/eventsgraphic.png"
 
-
 function App() {
+  const [email, setEmail] = useState('')
+  const [isSubscribed, setIsSubscribed] = useState(true)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const dto = {
+      email,
+      hasSubscribedToNewsletter: isSubscribed,
+    }
+
+    try {
+      const response = await fetch('/api/v1/betaAccessSignUp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dto),
+      })
+
+      if (response.ok) {
+        alert('Successfully signed up!')
+      } else {
+        alert('Failed to sign up. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('An error occurred. Please try again.')
+    }
+  }
+
   const leftsection = (
     <div className="flex-1 text-left">
       <h1 className="text-6xl font-extrabold text-gray-900">
@@ -16,18 +45,26 @@ function App() {
       <p className="mt-6 text-lg text-gray-700">
         Make every impromptu plan effortless. Stay in the loop and be the first to try <span className="text-spawn-purple">Spawn</span> when we go live! ⭐
       </p>
-      <div className="flex justify-center items-center space-x-4 mt-10">
+      <form onSubmit={handleSubmit} className="flex justify-center items-center space-x-4 mt-10">
         <Input
           className="bg-white rounded-full p-6"
           type="email"
           placeholder="Email address..."
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
         />
-        <Button className="rounded-full p-6">
+        <Button className="rounded-full p-6" type="submit">
           Notify Me
         </Button>
-      </div>
+      </form>
       <div className="flex items-center mt-6 space-x-2">
-        <Checkbox className="rounded-md" id="newsletter" defaultChecked />
+        <Checkbox
+          className="rounded-md"
+          id="newsletter"
+          checked={isSubscribed}
+          onChange={(e) => setIsSubscribed(e.target.checked)}
+        />
         <label
           htmlFor="newsletter"
           className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
