@@ -1,4 +1,5 @@
-import { Instagram, Linkedin } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faInstagram, faLinkedin } from "@fortawesome/free-brands-svg-icons";  
 
 function Footer() {
     return (
@@ -7,10 +8,10 @@ function Footer() {
                 <p className="text-sm">&copy; {new Date().getFullYear()} Spawn</p>
                 <div className="flex space-x-6">
                     <a href="https://www.instagram.com/spawnapp/" target="_blank" rel="noopener noreferrer">
-                        <Instagram className="w-6 h-6" />
+                        <FontAwesomeIcon icon={faInstagram} className="w-6 h-6" />
                     </a>
                     <a href="https://www.linkedin.com/company/spawnapp/" target="_blank" rel="noopener noreferrer">
-                        <Linkedin className="w-6 h-6" />
+                        <FontAwesomeIcon icon={faLinkedin} className="w-6 h-6" />
                     </a>
                 </div>
             </div>
