@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import logo from "./assets/spawnlogo.png"
+import events from "./assets/eventsgraphic.png"
 
 
 function App() {
@@ -19,7 +21,7 @@ function App() {
           placeholder="Email address..."
         />
         <Button className="mt-6 rounded-full p-6">
-          Get Started
+          Notify Me
         </Button>
       </div>
     </div>
@@ -28,24 +30,38 @@ function App() {
   const rightsection = (
     <div className="flex-1">
       <img
-        src="https://via.placeholder.com/400"
-        alt="Hero Image"
+        src={events}
+        alt="Events Graphic"
         className="w-full h-full object-cover rounded-lg"
       />
     </div>
   )
 
+  const navbar = (
+    <div className="py-4">
+      <div className="flex justify-center">
+        <img
+          src={logo} // The imported image path
+          alt="Logo"
+          className="h-10"
+        />
+      </div>
+    </div>
+  )
+
+  const bggrad = {
+    background: `radial-gradient(circle at 25% 50%, #EFF1FE, #D2D7FF)`,
+  }
+
   return (
     <>
-      <div
-        className="min-h-screen flex items-center justify-center bg-gray-100"
-        style={{
-          background: `radial-gradient(circle at 25% 50%, #EFF1FE, #D2D7FF)`,
-        }}
-      >
-        <div className="flex items-center justify-center space-x-8 p-8 max-w-screen-xl">
-          {leftsection}
-          {rightsection}
+      <div style={bggrad}>
+        {navbar}
+        <div className="min-h-screen flex items-center justify-center pb-12">
+          <div className="flex items-center justify-center space-x-20 p-8 max-w-screen-xl">
+            {leftsection}
+            {rightsection}
+          </div>
         </div>
       </div>
     </>
