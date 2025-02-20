@@ -4,7 +4,9 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
-  		colors: {}
+  		colors: {
+			"spawn-purple": "#8693FF"
+		}
   	}
   },
   plugins: [require("tailwindcss-animate")],
