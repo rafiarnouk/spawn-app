@@ -18,7 +18,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('/postRequest', {
+      const response = await fetch('/api/v1/betaAccessSignUp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
