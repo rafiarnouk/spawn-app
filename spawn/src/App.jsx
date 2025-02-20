@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import Navbar from "./components/Navbar"
 import logo from "./assets/spawnlogo.png"
 import events from "./assets/eventsgraphic.png"
-import StarIcon from "./assets/staricon.svg";
+import StarIcon from "./assets/staricon.svg"
 
 function App() {
   const [email, setEmail] = useState('')
@@ -94,18 +95,6 @@ function App() {
     </div>
   )
 
-  const navbar = (
-    <div className="py-4">
-      <div className="flex justify-center">
-        <img
-          src={logo}
-          alt="Logo"
-          className="h-10"
-        />
-      </div>
-    </div>
-  )
-
   const bggrad = {
     background: `radial-gradient(circle at 25% 50%, #EFF1FE, #C0C7FF)`,
   }
@@ -113,7 +102,7 @@ function App() {
   return (
     <>
       <div style={bggrad}>
-        {navbar}
+        <Navbar />
         <div className="min-h-screen flex items-center justify-center pb-12">
           <div className="flex items-center justify-center space-x-20 p-8 max-w-screen-xl">
             {leftsection}
