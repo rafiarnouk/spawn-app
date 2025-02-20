@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import Navbar from "./components/Navbar"
-import logo from "./assets/spawnlogo.png"
 import events from "./assets/eventsgraphic.png"
 import StarIcon from "./assets/staricon.svg"
 
@@ -44,7 +43,7 @@ function App() {
     }
   }
 
-  const leftsection = (
+  const herobody = (
     <div className="flex-1 text-left">
       <h1 className="text-6xl font-extrabold text-gray-900">
         Get notified for our <span className="text-spawn-purple">beta release.</span>
@@ -62,7 +61,7 @@ function App() {
           required
         />
         <Button className="rounded-full p-6 px-8" type="submit">
-          Notify Me 
+          Notify Me
           <img src={StarIcon} alt="Star Icon" className="mb-0.5 ml-1" />
         </Button>
       </form>
@@ -71,7 +70,7 @@ function App() {
           className="rounded-md"
           id="newsletter"
           checked={isSubscribed}
-          onCheckedChange={setIsSubscribed} 
+          onCheckedChange={setIsSubscribed}
         />
 
         <label
@@ -84,7 +83,7 @@ function App() {
     </div>
   )
 
-  const rightsection = (
+  const herographic = (
     <div className="flex-1">
       <img
         src={events}
@@ -104,9 +103,9 @@ function App() {
       <div style={bggrad}>
         <Navbar />
         <div className="min-h-screen flex items-center justify-center pb-12">
-          <div className="flex items-center justify-center space-x-20 p-8 max-w-screen-xl">
-            {leftsection}
-            {rightsection}
+          <div className="flex flex-col md:flex-row items-center justify-center space-y-20 md:space-y-0 md:space-x-20 p-8 max-w-screen-xl">
+            {herobody}
+            {herographic}
           </div>
         </div>
       </div>
