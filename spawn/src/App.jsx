@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import logo from "./assets/spawnlogo.png"
 import events from "./assets/eventsgraphic.png"
+import StarIcon from "./assets/staricon.svg";
 
 function App() {
   const [email, setEmail] = useState('')
@@ -59,8 +60,9 @@ function App() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <Button className="rounded-full p-6" type="submit">
-          Notify Me
+        <Button className="rounded-full p-6 px-8" type="submit">
+          Notify Me 
+          <img src={StarIcon} alt="Star Icon" className="mb-0.5 ml-1" />
         </Button>
       </form>
       <div className="flex items-center mt-6 space-x-2">
@@ -95,7 +97,7 @@ function App() {
     <div className="py-4">
       <div className="flex justify-center">
         <img
-          src={logo} // The imported image path
+          src={logo}
           alt="Logo"
           className="h-10"
         />
