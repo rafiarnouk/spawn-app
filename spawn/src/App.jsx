@@ -16,7 +16,6 @@ function App() {
       email,
       hasSubscribedToNewsletter: isSubscribed,
     }
-
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp`, {
         method: 'POST',
@@ -25,9 +24,11 @@ function App() {
         },
         body: JSON.stringify(dto),
       })
-
       if (response.ok) {
         alert('Successfully signed up!')
+        setEmail('') // Clear the form after successful submission
+      } else if (response.status === 409) {
+        alert('This email has already been added to the beta access sign up.')
       } else {
         alert('Failed to sign up. Please try again.')
       }
