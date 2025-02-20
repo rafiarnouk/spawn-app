@@ -18,7 +18,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('/api/v1/betaAccessSignUp', {
+      const response = await fetch('https://spawn-app-back-end-production.up.railway.app/api/v1/betaAccessSignUp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
