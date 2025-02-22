@@ -50,7 +50,7 @@ function App() {
         Get notified for our <span className="text-spawn-purple">beta release.</span>
       </h1>
       <p className="mt-6 text-lg text-gray-700">
-        Make every impromptu plan effortless. Stay in the loop and be the first to try <span className="text-spawn-purple">Spawn</span>! ⭐
+        Make every impromptu plan effortless. Stay in the loop and be the first to try <span className="text-spawn-purple">Spawn</span> when we go live! ⭐
       </p>
       <form onSubmit={handleSubmit} className="flex justify-center items-center space-x-4 mt-10">
         <Input
