@@ -6,18 +6,38 @@ import { Input } from "@/components/ui/input";
 function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     
-    // Check password against env variable
-    if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
-      // Store authentication in session storage
-      sessionStorage.setItem('admin_authenticated', 'true');
-      navigate('/admin/dashboard');
-    } else {
-      setError('Invalid password');
+    try {
+      // Call the server-side auth endpoint
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // Store authentication in session storage
+        sessionStorage.setItem('admin_authenticated', 'true');
+        navigate('/admin/dashboard');
+      } else {
+        setError(data.error || 'Invalid password');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,11 +65,12 @@ function AdminLogin() {
               placeholder="Enter admin password"
               className="w-full"
               required
+              disabled={loading}
             />
           </div>
           
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
           </Button>
         </form>
       </div>
