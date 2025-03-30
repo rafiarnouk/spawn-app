@@ -13,6 +13,20 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 
+// Helper function to format feedback type
+const formatFeedbackType = (type) => {
+  switch (type) {
+    case 'BUG':
+      return 'Bug Report';
+    case 'FEATURE_REQUEST':
+      return 'Feature Request';
+    case 'GENERAL_FEEDBACK':
+      return 'General Feedback';
+    default:
+      return type;
+  }
+};
+
 function FeedbackTab() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -120,7 +134,7 @@ function FeedbackTab() {
             onChange={(e) => setFilterType(e.target.value)}
           >
             <option value="">All Types</option>
-            <option value="BUG_REPORT">Bug Report</option>
+            <option value="BUG">Bug Report</option>
             <option value="FEATURE_REQUEST">Feature Request</option>
             <option value="GENERAL_FEEDBACK">General Feedback</option>
           </select>
@@ -157,7 +171,7 @@ function FeedbackTab() {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredFeedbacks.map(feedback => (
                 <tr key={feedback.id} className={feedback.resolved ? "bg-green-50" : ""}>
-                  <td className="px-6 py-4 whitespace-nowrap">{feedback.type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{formatFeedbackType(feedback.type)}</td>
                   <td className="px-6 py-4">{feedback.message}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {feedback.firstName && feedback.lastName 
