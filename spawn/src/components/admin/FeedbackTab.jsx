@@ -70,10 +70,10 @@ function FeedbackTab() {
     try {
       const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/api/v1/feedback/resolve/${selectedFeedback.id}`, 
-        JSON.stringify(resolutionComment),
+        resolutionComment,
         {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'text/plain'
           }
         }
       );
