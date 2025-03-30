@@ -14,7 +14,8 @@ const __dirname = dirname(__filename);
 dotenv.config();
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+const MAX_PORT_ATTEMPTS = 10;
 
 // Middleware
 app.use(cors());
@@ -44,6 +45,22 @@ app.post('/api/auth', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`API server running at http://localhost:${PORT}`);
-});
+// Function to try starting the server on different ports if needed
+function startServer(port, maxAttempts) {
+  const server = app.listen(port, () => {
+    console.log(`API server running at http://localhost:${port}`);
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE' && maxAttempts > 0) {
+      console.warn(`Port ${port} is in use, trying port ${port + 1}`);
+      startServer(port + 1, maxAttempts - 1);
+    } else {
+      console.error('Failed to start server:', error.message);
+      process.exit(1);
+    }
+  });
+}
+
+// Start the server with retry mechanism
+startServer(PORT, MAX_PORT_ATTEMPTS);
