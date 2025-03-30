@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import fs from 'fs';
 
 // Get directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -49,6 +50,12 @@ app.post('/api/auth', (req, res) => {
 function startServer(port, maxAttempts) {
   const server = app.listen(port, () => {
     console.log(`API server running at http://localhost:${port}`);
+    
+    // Write the actual port to a file for Vite to read
+    fs.writeFileSync('./.api-port', port.toString());
+    
+    // Set environment variable for the actual port
+    process.env.ACTUAL_API_PORT = port.toString();
   });
 
   server.on('error', (error) => {
