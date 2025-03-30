@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import axios from 'axios';
 import FeedbackTab from '../components/admin/FeedbackTab';
 import BetaSignupsTab from '../components/admin/BetaSignupsTab';
 import ReportsTab from '../components/admin/ReportsTab';
+import { isAuthenticated, logout } from '@/lib/authService';
 
 function Admin() {
   const [activeTab, setActiveTab] = useState('feedback');
@@ -12,9 +12,8 @@ function Admin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is authenticated
-    const isAuthenticated = sessionStorage.getItem('admin_authenticated') === 'true';
-    if (!isAuthenticated) {
+    // Check if user is authenticated using the auth service
+    if (!isAuthenticated()) {
       navigate('/admin');
     } else {
       setLoading(false);
@@ -22,7 +21,8 @@ function Admin() {
   }, [navigate]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('admin_authenticated');
+    // Use the logout function from our auth service
+    logout();
     navigate('/admin');
   };
 

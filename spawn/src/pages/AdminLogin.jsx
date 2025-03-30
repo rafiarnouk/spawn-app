@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { login } from '@/lib/authService';
 
 function AdminLogin() {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,27 +17,12 @@ function AdminLogin() {
     setError('');
     
     try {
-      // Call the server-side auth endpoint
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        // Store authentication in session storage
-        sessionStorage.setItem('admin_authenticated', 'true');
-        navigate('/admin/dashboard');
-      } else {
-        setError(data.error || 'Invalid password');
-      }
+      // Use JWT authentication service
+      await login(username, password);
+      navigate('/admin/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      setError('Authentication failed. Please try again.');
+      setError('Authentication failed. Please check your credentials and try again.');
     } finally {
       setLoading(false);
     }
@@ -54,15 +41,31 @@ function AdminLogin() {
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
+            <label htmlFor="username" className="block text-gray-700 mb-2">
+              Username
+            </label>
+            <Input 
+              id="username"
+              type="text" 
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
+              className="w-full"
+              required
+              disabled={loading}
+            />
+          </div>
+          
+          <div className="mb-4">
             <label htmlFor="password" className="block text-gray-700 mb-2">
-              Admin Password
+              Password
             </label>
             <Input 
               id="password"
               type="password" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter admin password"
+              placeholder="Enter your password"
               className="w-full"
               required
               disabled={loading}

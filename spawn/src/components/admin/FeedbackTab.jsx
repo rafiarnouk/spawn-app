@@ -12,6 +12,21 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import { ChevronUp, ChevronDown } from "lucide-react";
+
+// Helper function to format feedback type
+const formatFeedbackType = (type) => {
+  switch (type) {
+    case 'BUG':
+      return 'Bug Report';
+    case 'FEATURE_REQUEST':
+      return 'Feature Request';
+    case 'GENERAL_FEEDBACK':
+      return 'General Feedback';
+    default:
+      return type;
+  }
+};
 
 function FeedbackTab() {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -23,6 +38,7 @@ function FeedbackTab() {
   const [resolvingId, setResolvingId] = useState(null);
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: 'submittedAt', direction: 'desc' });
 
   useEffect(() => {
     fetchFeedbacks();
@@ -54,7 +70,12 @@ function FeedbackTab() {
     try {
       const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/api/v1/feedback/resolve/${selectedFeedback.id}`, 
-        resolutionComment
+        JSON.stringify(resolutionComment),
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
       
       setResolveDialogOpen(false);
@@ -97,14 +118,60 @@ function FeedbackTab() {
     }
   };
 
+  // Handle sorting
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Sort the feedback items
+  const sortedFeedbacks = [...feedbacks].sort((a, b) => {
+    if (!a[sortConfig.key] && !b[sortConfig.key]) return 0;
+    if (!a[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (!b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+
+    let comparison = 0;
+    
+    if (sortConfig.key === 'submittedAt') {
+      // Date comparison
+      comparison = new Date(a[sortConfig.key]) - new Date(b[sortConfig.key]);
+    } else if (sortConfig.key === 'resolved') {
+      // Boolean comparison
+      comparison = (a[sortConfig.key] === b[sortConfig.key]) ? 0 : a[sortConfig.key] ? 1 : -1;
+    } else if (sortConfig.key === 'type') {
+      // Compare formatted feedback type
+      comparison = formatFeedbackType(a[sortConfig.key]).localeCompare(formatFeedbackType(b[sortConfig.key]));
+    } else {
+      // String comparison
+      comparison = String(a[sortConfig.key]).localeCompare(String(b[sortConfig.key]));
+    }
+
+    return sortConfig.direction === 'asc' ? comparison : -comparison;
+  });
+
   // Apply both type and status filters
-  const filteredFeedbacks = feedbacks.filter(feedback => {
+  const filteredFeedbacks = sortedFeedbacks.filter(feedback => {
     const matchesType = !filterType || feedback.type === filterType;
     const matchesStatus = !statusFilter || 
       (statusFilter === 'RESOLVED' && feedback.resolved) || 
       (statusFilter === 'PENDING' && !feedback.resolved);
     return matchesType && matchesStatus;
   });
+
+  // Helper function for table header
+  const getSortIcon = (columnName) => {
+    if (sortConfig.key !== columnName) {
+      return null;
+    }
+    return sortConfig.direction === 'asc' ? (
+      <ChevronUp className="inline h-4 w-4 ml-1" />
+    ) : (
+      <ChevronDown className="inline h-4 w-4 ml-1" />
+    );
+  };
 
   if (loading) return <div>Loading feedback submissions...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
@@ -120,7 +187,7 @@ function FeedbackTab() {
             onChange={(e) => setFilterType(e.target.value)}
           >
             <option value="">All Types</option>
-            <option value="BUG_REPORT">Bug Report</option>
+            <option value="BUG">Bug Report</option>
             <option value="FEATURE_REQUEST">Feature Request</option>
             <option value="GENERAL_FEEDBACK">General Feedback</option>
           </select>
@@ -144,11 +211,36 @@ function FeedbackTab() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort('type')}
+                >
+                  Type {getSortIcon('type')}
+                </th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort('message')}
+                >
+                  Message {getSortIcon('message')}
+                </th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort('firstName')}
+                >
+                  User {getSortIcon('firstName')}
+                </th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort('submittedAt')}
+                >
+                  Submitted {getSortIcon('submittedAt')}
+                </th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort('resolved')}
+                >
+                  Status {getSortIcon('resolved')}
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resolution</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -157,7 +249,7 @@ function FeedbackTab() {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredFeedbacks.map(feedback => (
                 <tr key={feedback.id} className={feedback.resolved ? "bg-green-50" : ""}>
-                  <td className="px-6 py-4 whitespace-nowrap">{feedback.type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{formatFeedbackType(feedback.type)}</td>
                   <td className="px-6 py-4">{feedback.message}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {feedback.firstName && feedback.lastName 

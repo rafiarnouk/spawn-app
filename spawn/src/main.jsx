@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.jsx'
 import Admin from './pages/Admin.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
+import PrivateRoute from './components/PrivateRoute.jsx'
 import { Analytics } from "@vercel/analytics/react"
 
 createRoot(document.getElementById('root')).render(
@@ -14,7 +15,14 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<Admin />} />
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <PrivateRoute>
+              <Admin />
+            </PrivateRoute>
+          } 
+        />
       </Routes>
     </BrowserRouter>
   </StrictMode>

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { authenticatedRequest } from '@/lib/authService';
 
 function BetaSignupsTab() {
   const [signups, setSignups] = useState([]);
@@ -22,8 +22,11 @@ function BetaSignupsTab() {
   const fetchBetaSignups = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp/records`);
-      setSignups(response.data);
+      const response = await authenticatedRequest(
+        `${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp/records`
+      );
+      const data = await response.json();
+      setSignups(data);
       setError(null);
     } catch (err) {
       setError('Failed to fetch beta signups');
@@ -35,10 +38,36 @@ function BetaSignupsTab() {
 
   const fetchEmails = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp/emails`);
-      setEmails(response.data);
+      const response = await authenticatedRequest(
+        `${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp/emails`
+      );
+      const data = await response.json();
+      setEmails(data);
     } catch (err) {
       console.error('Failed to fetch emails', err);
+    }
+  };
+
+  // Function to update the emailed status of a signup
+  const updateEmailedStatus = async (id, hasBeenEmailed) => {
+    try {
+      await authenticatedRequest(
+        `${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp/${id}/emailed`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ hasBeenEmailed })
+        }
+      );
+      
+      // Update local state
+      setSignups(signups.map(signup => 
+        signup.id === id ? { ...signup, hasBeenEmailed } : signup
+      ));
+    } catch (err) {
+      console.error('Failed to update emailed status', err);
     }
   };
 
@@ -62,7 +91,7 @@ function BetaSignupsTab() {
   };
 
   const filteredSignups = signups.filter(signup => {
-    const signupDate = new Date(signup.createdAt);
+    const signupDate = new Date(signup.signedUpAt);
     const passesDateFilter = (!startDate || signupDate >= startDate) && 
                              (!endDate || signupDate <= endDate);
     
@@ -152,6 +181,8 @@ function BetaSignupsTab() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Newsletter</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Emailed</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -159,7 +190,7 @@ function BetaSignupsTab() {
                 <tr key={signup.id}>
                   <td className="px-6 py-4 whitespace-nowrap">{signup.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(signup.createdAt).toLocaleString()}
+                    {new Date(signup.signedUpAt).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -167,6 +198,22 @@ function BetaSignupsTab() {
                     }`}>
                       {signup.hasSubscribedToNewsletter ? 'Subscribed' : 'Not Subscribed'}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      signup.hasBeenEmailed ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'
+                    }`}>
+                      {signup.hasBeenEmailed ? 'Emailed' : 'Not Emailed'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Button 
+                      size="sm" 
+                      variant={signup.hasBeenEmailed ? "outline" : "default"}
+                      onClick={() => updateEmailedStatus(signup.id, !signup.hasBeenEmailed)}
+                    >
+                      {signup.hasBeenEmailed ? 'Mark as Not Emailed' : 'Mark as Emailed'}
+                    </Button>
                   </td>
                 </tr>
               ))}
