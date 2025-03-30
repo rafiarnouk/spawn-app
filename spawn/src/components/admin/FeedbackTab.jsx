@@ -160,11 +160,16 @@ function FeedbackTab() {
                   <td className="px-6 py-4 whitespace-nowrap">{feedback.type}</td>
                   <td className="px-6 py-4">{feedback.message}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {feedback.fromUserId ? feedback.fromUserId : 'Anonymous'}
+                    {feedback.firstName && feedback.lastName 
+                      ? `${feedback.firstName} ${feedback.lastName}`
+                      : feedback.fromUserId ? 'User ID: ' + feedback.fromUserId 
+                      : 'Anonymous'}
                     {feedback.fromUserEmail && <div className="text-sm text-gray-500">{feedback.fromUserEmail}</div>}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(feedback.createdAt).toLocaleString()}
+                    {feedback.submittedAt 
+                      ? new Date(feedback.submittedAt).toLocaleString()
+                      : 'Invalid Date'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -172,11 +177,6 @@ function FeedbackTab() {
                     }`}>
                       {feedback.resolved ? 'Resolved' : 'Pending'}
                     </span>
-                    {feedback.resolved && feedback.resolvedAt && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        {new Date(feedback.resolvedAt).toLocaleString()}
-                      </div>
-                    )}
                   </td>
                   <td className="px-6 py-4">
                     {feedback.resolutionComment ? (
@@ -218,7 +218,7 @@ function FeedbackTab() {
       )}
 
       <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
-        <DialogContent>
+        <DialogContent className="z-50">
           <DialogHeader>
             <DialogTitle>
               {selectedFeedback && selectedFeedback.resolved 
