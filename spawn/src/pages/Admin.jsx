@@ -12,6 +12,10 @@ function Admin() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = "Admin";
+  }, []);
+
+  useEffect(() => {
     // Check if user is authenticated using the auth service
     if (!isAuthenticated()) {
       navigate('/admin');
