@@ -103,7 +103,7 @@ function FeedbackTab() {
     
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/v1/feedback/resolve/${selectedFeedback.id}`, 
+        `${import.meta.env.VITE_API_URL}/api/v1/feedback/status/${selectedFeedback.id}?status=${selectedFeedback.status}`, 
         resolutionComment,
         {
           headers: {
@@ -117,15 +117,15 @@ function FeedbackTab() {
       setSelectedFeedback(null);
       fetchFeedbacks();
       toast({
-        title: "Feedback resolved",
-        description: "The feedback has been successfully resolved."
+        title: "Feedback updated",
+        description: "The feedback has been successfully updated."
       });
     } catch (err) {
-      setError('Failed to resolve feedback');
+      setError('Failed to update feedback');
       console.error(err);
       toast({
         title: "Error",
-        description: "Failed to resolve feedback. Please try again.",
+        description: "Failed to update feedback. Please try again.",
         variant: "destructive"
       });
     }
@@ -308,7 +308,7 @@ function FeedbackTab() {
                 >
                   Status {getSortIcon('status')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resolution</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -359,20 +359,20 @@ function FeedbackTab() {
                             In Progress
                           </Button>
                           <Button size="sm" onClick={() => openResolveDialog(feedback)}>
-                            Resolve
+                            Update
                           </Button>
                         </>
                       )}
                       {feedback.status === 'IN_PROGRESS' && (
                         <>
                           <Button size="sm" onClick={() => openResolveDialog(feedback)}>
-                            Resolve
+                            Update
                           </Button>
                         </>
                       )}
                       {feedback.status === 'RESOLVED' && (
                         <Button size="sm" variant="outline" onClick={() => openResolveDialog(feedback)}>
-                          Update Resolution
+                          Update
                         </Button>
                       )}
                       <Button size="sm" variant="destructive" onClick={() => handleDelete(feedback.id)}>
@@ -391,14 +391,10 @@ function FeedbackTab() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedFeedback && selectedFeedback.status === 'RESOLVED' 
-                ? "Update Resolution" 
-                : "Resolve Feedback"}
+              Update Feedback
             </DialogTitle>
             <DialogDescription>
-              {selectedFeedback && selectedFeedback.status === 'RESOLVED' 
-                ? "Update the resolution comment for this feedback." 
-                : "Add a resolution comment to explain how this feedback was addressed."}
+              Update the status and comment for this feedback.
             </DialogDescription>
           </DialogHeader>
           
@@ -410,14 +406,30 @@ function FeedbackTab() {
               </div>
               
               <div className="space-y-2">
+                <label htmlFor="feedback-status" className="text-sm font-medium">
+                  Status:
+                </label>
+                <select 
+                  id="feedback-status"
+                  className="w-full p-2 border rounded"
+                  value={selectedFeedback.status}
+                  onChange={(e) => setSelectedFeedback({...selectedFeedback, status: e.target.value})}
+                >
+                  <option value="PENDING">Pending</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="RESOLVED">Resolved</option>
+                </select>
+              </div>
+              
+              <div className="space-y-2">
                 <label htmlFor="resolution-comment" className="text-sm font-medium">
-                  Resolution Comment:
+                  Comment:
                 </label>
                 <Textarea 
                   id="resolution-comment"
                   value={resolutionComment} 
                   onChange={(e) => setResolutionComment(e.target.value)}
-                  placeholder="Explain how this issue was resolved..."
+                  placeholder="Add your comment here..."
                   rows={4}
                 />
               </div>
@@ -436,7 +448,7 @@ function FeedbackTab() {
               type="button"
               onClick={handleResolve}
             >
-              {selectedFeedback && selectedFeedback.status === 'RESOLVED' ? "Update" : "Resolve"}
+              Update
             </Button>
           </DialogFooter>
         </DialogContent>
