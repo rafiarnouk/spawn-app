@@ -2,14 +2,27 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
 
 function FeedbackTab() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [resolutionComment, setResolutionComment] = useState('');
   const [resolvingId, setResolvingId] = useState(null);
+  const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
 
   useEffect(() => {
     fetchFeedbacks();
@@ -29,18 +42,37 @@ function FeedbackTab() {
     }
   };
 
-  const handleResolve = async (id) => {
+  const openResolveDialog = (feedback) => {
+    setSelectedFeedback(feedback);
+    setResolutionComment(feedback.resolutionComment || '');
+    setResolveDialogOpen(true);
+  };
+
+  const handleResolve = async () => {
+    if (!selectedFeedback) return;
+    
     try {
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/v1/feedback/resolve/${id}`, 
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/v1/feedback/resolve/${selectedFeedback.id}`, 
         resolutionComment
       );
-      setResolvingId(null);
+      
+      setResolveDialogOpen(false);
       setResolutionComment('');
+      setSelectedFeedback(null);
       fetchFeedbacks();
+      toast({
+        title: "Feedback resolved",
+        description: "The feedback has been successfully resolved."
+      });
     } catch (err) {
       setError('Failed to resolve feedback');
       console.error(err);
+      toast({
+        title: "Error",
+        description: "Failed to resolve feedback. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -49,16 +81,30 @@ function FeedbackTab() {
       try {
         await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/feedback/delete/${id}`);
         fetchFeedbacks();
+        toast({
+          title: "Feedback deleted",
+          description: "The feedback has been successfully deleted."
+        });
       } catch (err) {
         setError('Failed to delete feedback');
         console.error(err);
+        toast({
+          title: "Error",
+          description: "Failed to delete feedback. Please try again.",
+          variant: "destructive"
+        });
       }
     }
   };
 
-  const filteredFeedbacks = filterType 
-    ? feedbacks.filter(feedback => feedback.type === filterType) 
-    : feedbacks;
+  // Apply both type and status filters
+  const filteredFeedbacks = feedbacks.filter(feedback => {
+    const matchesType = !filterType || feedback.type === filterType;
+    const matchesStatus = !statusFilter || 
+      (statusFilter === 'RESOLVED' && feedback.resolved) || 
+      (statusFilter === 'PENDING' && !feedback.resolved);
+    return matchesType && matchesStatus;
+  });
 
   if (loading) return <div>Loading feedback submissions...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
@@ -78,6 +124,15 @@ function FeedbackTab() {
             <option value="FEATURE_REQUEST">Feature Request</option>
             <option value="GENERAL_FEEDBACK">General Feedback</option>
           </select>
+          <select 
+            className="border rounded p-2"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">All Status</option>
+            <option value="RESOLVED">Resolved</option>
+            <option value="PENDING">Pending</option>
+          </select>
           <Button onClick={fetchFeedbacks}>Refresh</Button>
         </div>
       </div>
@@ -94,13 +149,14 @@ function FeedbackTab() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resolution</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredFeedbacks.map(feedback => (
-                <tr key={feedback.id}>
+                <tr key={feedback.id} className={feedback.resolved ? "bg-green-50" : ""}>
                   <td className="px-6 py-4 whitespace-nowrap">{feedback.type}</td>
                   <td className="px-6 py-4">{feedback.message}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -116,6 +172,20 @@ function FeedbackTab() {
                     }`}>
                       {feedback.resolved ? 'Resolved' : 'Pending'}
                     </span>
+                    {feedback.resolved && feedback.resolvedAt && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(feedback.resolvedAt).toLocaleString()}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    {feedback.resolutionComment ? (
+                      <div className="text-sm">
+                        {feedback.resolutionComment}
+                      </div>
+                    ) : feedback.resolved ? (
+                      <div className="text-sm text-gray-500 italic">No comment provided</div>
+                    ) : null}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {feedback.imageUrl && (
@@ -125,31 +195,20 @@ function FeedbackTab() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    {resolvingId === feedback.id ? (
-                      <div className="flex flex-col space-y-2">
-                        <Input
-                          type="text"
-                          value={resolutionComment}
-                          onChange={(e) => setResolutionComment(e.target.value)}
-                          placeholder="Resolution comment"
-                        />
-                        <div className="flex space-x-2">
-                          <Button size="sm" onClick={() => handleResolve(feedback.id)}>Confirm</Button>
-                          <Button size="sm" variant="outline" onClick={() => setResolvingId(null)}>Cancel</Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex space-x-2">
-                        {!feedback.resolved && (
-                          <Button size="sm" onClick={() => setResolvingId(feedback.id)}>
-                            Resolve
-                          </Button>
-                        )}
-                        <Button size="sm" variant="destructive" onClick={() => handleDelete(feedback.id)}>
-                          Delete
+                    <div className="flex space-x-2">
+                      {!feedback.resolved ? (
+                        <Button size="sm" onClick={() => openResolveDialog(feedback)}>
+                          Resolve
                         </Button>
-                      </div>
-                    )}
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => openResolveDialog(feedback)}>
+                          Update Resolution
+                        </Button>
+                      )}
+                      <Button size="sm" variant="destructive" onClick={() => handleDelete(feedback.id)}>
+                        Delete
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -157,6 +216,54 @@ function FeedbackTab() {
           </table>
         </div>
       )}
+
+      <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selectedFeedback && selectedFeedback.resolved 
+                ? "Update Resolution" 
+                : "Resolve Feedback"}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedFeedback && selectedFeedback.resolved 
+                ? "Update the resolution comment for this feedback." 
+                : "Add a resolution comment to explain how this feedback was addressed."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedFeedback && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Feedback Message:</p>
+                <p className="text-sm border p-2 rounded bg-gray-50">{selectedFeedback.message}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="resolution-comment" className="text-sm font-medium">
+                  Resolution Comment:
+                </label>
+                <Textarea 
+                  id="resolution-comment"
+                  value={resolutionComment} 
+                  onChange={(e) => setResolutionComment(e.target.value)}
+                  placeholder="Explain how this issue was resolved..."
+                  rows={4}
+                />
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResolveDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleResolve}>
+              {selectedFeedback && selectedFeedback.resolved ? "Update" : "Resolve"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
