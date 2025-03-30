@@ -310,7 +310,7 @@ function FeedbackTab() {
       )}
 
       <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
-        <DialogContent className="z-50">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {selectedFeedback && selectedFeedback.resolved 
@@ -347,10 +347,17 @@ function FeedbackTab() {
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setResolveDialogOpen(false)}>
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => setResolveDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={handleResolve}>
+            <Button 
+              type="button"
+              onClick={handleResolve}
+            >
               {selectedFeedback && selectedFeedback.resolved ? "Update" : "Resolve"}
             </Button>
           </DialogFooter>
