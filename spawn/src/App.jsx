@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 import events from "./assets/eventsgraphic.png"
 import StarIcon from "./assets/staricon.svg"
+import { ToastContainer } from "@/components/ui/use-toast"
 
 function App() {
   const [email, setEmail] = useState('')
@@ -111,6 +112,7 @@ function App() {
         </div>
         <Footer />
       </div>
+      <ToastContainer />
     </>
   )
 }
