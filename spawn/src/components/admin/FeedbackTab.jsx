@@ -28,6 +28,34 @@ const formatFeedbackType = (type) => {
   }
 };
 
+// Helper function to format feedback status
+const formatFeedbackStatus = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending';
+    case 'IN_PROGRESS':
+      return 'In Progress';
+    case 'RESOLVED':
+      return 'Resolved';
+    default:
+      return status;
+  }
+};
+
+// Helper function to get status color
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'IN_PROGRESS':
+      return 'bg-blue-100 text-blue-800';
+    case 'RESOLVED':
+      return 'bg-green-100 text-green-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
 function FeedbackTab() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,9 +63,9 @@ function FeedbackTab() {
   const [filterType, setFilterType] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [resolutionComment, setResolutionComment] = useState('');
-  const [resolvingId, setResolvingId] = useState(null);
-  const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
+  const [inProgressDialogOpen, setInProgressDialogOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'submittedAt', direction: 'desc' });
 
   useEffect(() => {
@@ -62,6 +90,12 @@ function FeedbackTab() {
     setSelectedFeedback(feedback);
     setResolutionComment(feedback.resolutionComment || '');
     setResolveDialogOpen(true);
+  };
+
+  const openInProgressDialog = (feedback) => {
+    setSelectedFeedback(feedback);
+    setResolutionComment(feedback.resolutionComment || '');
+    setInProgressDialogOpen(true);
   };
 
   const handleResolve = async () => {
@@ -92,6 +126,39 @@ function FeedbackTab() {
       toast({
         title: "Error",
         description: "Failed to resolve feedback. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleMarkInProgress = async () => {
+    if (!selectedFeedback) return;
+    
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/v1/feedback/in-progress/${selectedFeedback.id}`, 
+        resolutionComment,
+        {
+          headers: {
+            'Content-Type': 'text/plain'
+          }
+        }
+      );
+      
+      setInProgressDialogOpen(false);
+      setResolutionComment('');
+      setSelectedFeedback(null);
+      fetchFeedbacks();
+      toast({
+        title: "Feedback status updated",
+        description: "The feedback has been marked as in progress."
+      });
+    } catch (err) {
+      setError('Failed to update feedback status');
+      console.error(err);
+      toast({
+        title: "Error",
+        description: "Failed to update feedback status. Please try again.",
         variant: "destructive"
       });
     }
@@ -138,9 +205,10 @@ function FeedbackTab() {
     if (sortConfig.key === 'submittedAt') {
       // Date comparison
       comparison = new Date(a[sortConfig.key]) - new Date(b[sortConfig.key]);
-    } else if (sortConfig.key === 'resolved') {
-      // Boolean comparison
-      comparison = (a[sortConfig.key] === b[sortConfig.key]) ? 0 : a[sortConfig.key] ? 1 : -1;
+    } else if (sortConfig.key === 'status') {
+      // Status comparison
+      const statusOrder = { 'PENDING': 0, 'IN_PROGRESS': 1, 'RESOLVED': 2 };
+      comparison = statusOrder[a[sortConfig.key]] - statusOrder[b[sortConfig.key]];
     } else if (sortConfig.key === 'type') {
       // Compare formatted feedback type
       comparison = formatFeedbackType(a[sortConfig.key]).localeCompare(formatFeedbackType(b[sortConfig.key]));
@@ -155,9 +223,7 @@ function FeedbackTab() {
   // Apply both type and status filters
   const filteredFeedbacks = sortedFeedbacks.filter(feedback => {
     const matchesType = !filterType || feedback.type === filterType;
-    const matchesStatus = !statusFilter || 
-      (statusFilter === 'RESOLVED' && feedback.resolved) || 
-      (statusFilter === 'PENDING' && !feedback.resolved);
+    const matchesStatus = !statusFilter || feedback.status === statusFilter;
     return matchesType && matchesStatus;
   });
 
@@ -197,8 +263,9 @@ function FeedbackTab() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">All Status</option>
-            <option value="RESOLVED">Resolved</option>
             <option value="PENDING">Pending</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="RESOLVED">Resolved</option>
           </select>
           <Button onClick={fetchFeedbacks}>Refresh</Button>
         </div>
@@ -237,9 +304,9 @@ function FeedbackTab() {
                 </th>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => requestSort('resolved')}
+                  onClick={() => requestSort('status')}
                 >
-                  Status {getSortIcon('resolved')}
+                  Status {getSortIcon('status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resolution</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
@@ -248,7 +315,7 @@ function FeedbackTab() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredFeedbacks.map(feedback => (
-                <tr key={feedback.id} className={feedback.resolved ? "bg-green-50" : ""}>
+                <tr key={feedback.id} className={feedback.status === 'RESOLVED' ? "bg-green-50" : feedback.status === 'IN_PROGRESS' ? "bg-blue-50" : ""}>
                   <td className="px-6 py-4 whitespace-nowrap">{formatFeedbackType(feedback.type)}</td>
                   <td className="px-6 py-4">{feedback.message}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -264,10 +331,8 @@ function FeedbackTab() {
                       : 'Invalid Date'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      feedback.resolved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {feedback.resolved ? 'Resolved' : 'Pending'}
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(feedback.status)}`}>
+                      {formatFeedbackStatus(feedback.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -275,7 +340,7 @@ function FeedbackTab() {
                       <div className="text-sm">
                         {feedback.resolutionComment}
                       </div>
-                    ) : feedback.resolved ? (
+                    ) : feedback.status === 'RESOLVED' ? (
                       <div className="text-sm text-gray-500 italic">No comment provided</div>
                     ) : null}
                   </td>
@@ -288,11 +353,24 @@ function FeedbackTab() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex space-x-2">
-                      {!feedback.resolved ? (
-                        <Button size="sm" onClick={() => openResolveDialog(feedback)}>
-                          Resolve
-                        </Button>
-                      ) : (
+                      {feedback.status === 'PENDING' && (
+                        <>
+                          <Button size="sm" onClick={() => openInProgressDialog(feedback)}>
+                            In Progress
+                          </Button>
+                          <Button size="sm" onClick={() => openResolveDialog(feedback)}>
+                            Resolve
+                          </Button>
+                        </>
+                      )}
+                      {feedback.status === 'IN_PROGRESS' && (
+                        <>
+                          <Button size="sm" onClick={() => openResolveDialog(feedback)}>
+                            Resolve
+                          </Button>
+                        </>
+                      )}
+                      {feedback.status === 'RESOLVED' && (
                         <Button size="sm" variant="outline" onClick={() => openResolveDialog(feedback)}>
                           Update Resolution
                         </Button>
@@ -313,12 +391,12 @@ function FeedbackTab() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedFeedback && selectedFeedback.resolved 
+              {selectedFeedback && selectedFeedback.status === 'RESOLVED' 
                 ? "Update Resolution" 
                 : "Resolve Feedback"}
             </DialogTitle>
             <DialogDescription>
-              {selectedFeedback && selectedFeedback.resolved 
+              {selectedFeedback && selectedFeedback.status === 'RESOLVED' 
                 ? "Update the resolution comment for this feedback." 
                 : "Add a resolution comment to explain how this feedback was addressed."}
             </DialogDescription>
@@ -358,7 +436,56 @@ function FeedbackTab() {
               type="button"
               onClick={handleResolve}
             >
-              {selectedFeedback && selectedFeedback.resolved ? "Update" : "Resolve"}
+              {selectedFeedback && selectedFeedback.status === 'RESOLVED' ? "Update" : "Resolve"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={inProgressDialogOpen} onOpenChange={setInProgressDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mark as In Progress</DialogTitle>
+            <DialogDescription>
+              Mark this feedback as in progress and optionally add a comment about what's being done.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedFeedback && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Feedback Message:</p>
+                <p className="text-sm border p-2 rounded bg-gray-50">{selectedFeedback.message}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="progress-comment" className="text-sm font-medium">
+                  Comment (Optional):
+                </label>
+                <Textarea 
+                  id="progress-comment"
+                  value={resolutionComment} 
+                  onChange={(e) => setResolutionComment(e.target.value)}
+                  placeholder="Enter details about what's being done..."
+                  rows={4}
+                />
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => setInProgressDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              onClick={handleMarkInProgress}
+            >
+              Mark In Progress
             </Button>
           </DialogFooter>
         </DialogContent>
