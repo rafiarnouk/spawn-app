@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
+import {authenticatedRequest} from "@/lib/authService.js";
 
 function ReportsTab() {
   const [reports, setReports] = useState([]);
@@ -32,7 +33,7 @@ function ReportsTab() {
         url += `?${params.join('&')}`;
       }
       
-      const response = await axios.get(url);
+      const response = await authenticatedRequest(url);
       setReports(response.data);
       setError(null);
     } catch (err) {

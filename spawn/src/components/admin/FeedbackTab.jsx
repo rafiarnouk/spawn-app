@@ -13,6 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import {authenticatedRequest} from "@/lib/authService.js";
 
 // Helper function to format feedback type
 const formatFeedbackType = (type) => {
@@ -75,7 +76,9 @@ function FeedbackTab() {
   const fetchFeedbacks = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/feedback`);
+      const response = await authenticatedRequest(
+          `${import.meta.env.VITE_API_URL}/api/v1/feedback`
+      );
       setFeedbacks(response.data);
       setError(null);
     } catch (err) {
