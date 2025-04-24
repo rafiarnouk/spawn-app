@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Login function to authenticate using the backend API
@@ -45,7 +47,7 @@ export const refreshAccessToken = async () => {
       throw new Error('No refresh token available');
     }
     
-    const response = await fetch(`${API_URL}/api/v1/auth/refresh-token`, {
+    const response = await axios.get(`${API_URL}/api/v1/auth/refresh-token`, {
       method: 'POST',
       headers: {
         'Authorization': refreshToken
@@ -98,7 +100,7 @@ export const authenticatedRequest = async (url, options = {}) => {
   };
   
   try {
-    let response = await fetch(url, requestOptions);
+    let response = await axios.get(url, requestOptions);
     
     // If unauthorized, try to refresh token and retry
     if (response.status === 401) {
