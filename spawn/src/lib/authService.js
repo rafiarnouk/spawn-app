@@ -116,7 +116,7 @@ export const authenticatedRequest = async (url, options = {}) => {
       }
     }
     
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error(`Request failed with status: ${response.status}`);
     }
     
