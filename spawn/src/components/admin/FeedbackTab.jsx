@@ -77,7 +77,8 @@ function FeedbackTab() {
       const response = await authenticatedRequest(
           `${import.meta.env.VITE_API_URL}/api/v1/feedback`
       );
-      setFeedbacks(response.data);
+      const data = await response.json();
+      setFeedbacks(data);
       setError(null);
     } catch (err) {
       setError('Failed to fetch feedback submissions');
