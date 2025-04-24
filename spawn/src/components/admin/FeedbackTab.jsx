@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   Dialog, 
   DialogContent, 
@@ -105,20 +103,21 @@ function FeedbackTab() {
     if (!selectedFeedback) return;
     
     try {
-      const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/v1/feedback/status/${selectedFeedback.id}?status=${selectedFeedback.status}`, 
-        resolutionComment,
+      await authenticatedRequest(
+        `${import.meta.env.VITE_API_URL}/api/v1/feedback/status/${selectedFeedback.id}?status=${selectedFeedback.status}`,
         {
+          method: "PUT",
           headers: {
             'Content-Type': 'text/plain'
-          }
+          },
+          body: resolutionComment
         }
       );
       
       setResolveDialogOpen(false);
       setResolutionComment('');
       setSelectedFeedback(null);
-      fetchFeedbacks();
+      await fetchFeedbacks();
       toast({
         title: "Feedback updated",
         description: "The feedback has been successfully updated."
@@ -138,20 +137,21 @@ function FeedbackTab() {
     if (!selectedFeedback) return;
     
     try {
-      const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/v1/feedback/in-progress/${selectedFeedback.id}`, 
-        resolutionComment,
+       await authenticatedRequest(
+        `${import.meta.env.VITE_API_URL}/api/v1/feedback/in-progress/${selectedFeedback.id}`,
         {
+          method: "PUT",
           headers: {
             'Content-Type': 'text/plain'
-          }
+          },
+          body: resolutionComment
         }
       );
       
       setInProgressDialogOpen(false);
       setResolutionComment('');
       setSelectedFeedback(null);
-      fetchFeedbacks();
+      await fetchFeedbacks();
       toast({
         title: "Feedback status updated",
         description: "The feedback has been marked as in progress."
@@ -170,8 +170,8 @@ function FeedbackTab() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this feedback?')) {
       try {
-        await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/feedback/delete/${id}`);
-        fetchFeedbacks();
+        await authenticatedRequest(`${import.meta.env.VITE_API_URL}/api/v1/feedback/delete/${id}`, {method: "DELETE"});
+        await fetchFeedbacks();
         toast({
           title: "Feedback deleted",
           description: "The feedback has been successfully deleted."

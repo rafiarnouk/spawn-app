@@ -100,7 +100,7 @@ export const authenticatedRequest = async (url, options = {}) => {
   };
   
   try {
-    let response = await axios.get(url, requestOptions);
+    let response = await fetch(url, requestOptions);
     
     // If unauthorized, try to refresh token and retry
     if (response.status === 401) {

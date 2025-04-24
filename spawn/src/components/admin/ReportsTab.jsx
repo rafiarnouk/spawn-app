@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import {authenticatedRequest} from "@/lib/authService.js";
 
@@ -20,7 +19,7 @@ function ReportsTab() {
       // Build query string with filters
       let url = `${import.meta.env.VITE_API_URL}/api/v1/reports`;
       const params = [];
-      
+
       if (filterReportType) {
         params.push(`reportType=${filterReportType}`);
       }
@@ -34,7 +33,8 @@ function ReportsTab() {
       }
       
       const response = await authenticatedRequest(url);
-      setReports(response.data);
+      const data = await response.json()
+      setReports(data);
       setError(null);
     } catch (err) {
       setError('Failed to fetch reports. This feature may still be in development.');
@@ -46,8 +46,14 @@ function ReportsTab() {
 
   const handleResolve = async (reportId, resolution) => {
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/reports/${reportId}?resolution=${resolution}`);
-      fetchReports();
+      await authenticatedRequest(`${import.meta.env.VITE_API_URL}/api/v1/reports/${reportId}?resolution=${resolution}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+      await fetchReports();
     } catch (err) {
       setError('Failed to resolve report');
       console.error(err);
@@ -57,8 +63,8 @@ function ReportsTab() {
   const handleDelete = async (reportId) => {
     if (window.confirm('Are you sure you want to delete this report?')) {
       try {
-        await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/reports/${reportId}`);
-        fetchReports();
+        await authenticatedRequest(`${import.meta.env.VITE_API_URL}/api/v1/reports/${reportId}`, {method: "DELETE"})
+        await fetchReports();
       } catch (err) {
         setError('Failed to delete report');
         console.error(err);
