@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.jsx'
 import Admin from './pages/Admin.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
+import EventInvite from './pages/EventInvite.jsx'
 import PrivateRoute from './components/PrivateRoute.jsx'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')).render(
             </PrivateRoute>
           } 
         />
+        <Route path="/invite/:inviteId" element={<EventInvite />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
