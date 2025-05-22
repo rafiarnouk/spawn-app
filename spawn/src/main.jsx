@@ -7,6 +7,7 @@ import Admin from './pages/Admin.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import EventInvite from './pages/EventInvite.jsx'
 import GuestSignIn from './pages/GuestSignIn.jsx'
+import Login from './pages/Login.jsx'
 import PrivateRoute from './components/PrivateRoute.jsx'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<AdminLogin />} />
         <Route 
           path="/admin/dashboard" 
