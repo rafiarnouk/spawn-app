@@ -26,7 +26,7 @@ function Login() {
       
       // Mock successful login
       // This would be replaced with actual authentication logic
-      // navigate('/dashboard'); // Redirect to dashboard after login
+      navigate('/onboarding'); // Redirect to onboarding after login
     } catch (error) {
       console.error('Error logging in:', error);
       alert('An error occurred. Please try again.');
