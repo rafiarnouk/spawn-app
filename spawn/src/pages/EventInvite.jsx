@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 function EventInvite() {
   const { inviteId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title = "Spawn - You've Been Invited!";
@@ -20,15 +21,9 @@ function EventInvite() {
     additionalAttendees: 20
   };
 
-  const handleSpawnIn = async () => {
-    try {
-      // In a real app, you would send a request to accept the invitation
-      console.log("Accepting invitation:", inviteId);
-      alert("Invitation accepted! You've spawned in.");
-    } catch (error) {
-      console.error('Error accepting invitation:', error);
-      alert('An error occurred. Please try again.');
-    }
+  const handleSpawnIn = () => {
+    // Redirect to guest sign-in page with the inviteId
+    navigate(`/invite/${inviteId}/sign-in`);
   };
 
   // Gradient background style
