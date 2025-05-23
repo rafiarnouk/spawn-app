@@ -28,7 +28,7 @@ function GuestSignIn() {
       // Mock successful sign-in
       // Redirect to the onboarding page after successful sign-in
       // This would be replaced with actual logic in a real app
-      navigate('/onboarding'); // Redirect to onboarding
+      navigate(`/invite/${inviteId}/onboarding`); // Redirect to onboarding with inviteId
     } catch (error) {
       console.error('Error signing in:', error);
       alert('An error occurred. Please try again.');

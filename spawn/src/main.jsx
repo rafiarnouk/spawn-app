@@ -31,6 +31,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/invite/:inviteId" element={<EventInvite />} />
         <Route path="/invite/:inviteId/sign-in" element={<GuestSignIn />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/invite/:inviteId/onboarding" element={<Onboarding />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
