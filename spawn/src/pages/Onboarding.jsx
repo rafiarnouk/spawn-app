@@ -5,6 +5,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 // Import app promo assets
 import appLogo from '@/assets/app_promo/app_logo.png';
 import downloadButton from '@/assets/app_promo/download_button.png';
+import firstAppImg from '@/assets/app_promo/first.png';
+import secondAppImg from '@/assets/app_promo/second.png';
+import thirdAppImg from '@/assets/app_promo/third.png';
 
 function Onboarding() {
   const { inviteId } = useParams();
@@ -98,15 +101,17 @@ function Onboarding() {
               {eventData.eventDescription}
             </p>
           </div>
+          
+          {/* Going button - moved inside the event card */}
+          <div className="mt-4">
+            <Button 
+              className="w-full bg-white hover:bg-gray-100 text-gray-800 rounded-full py-6"
+              disabled
+            >
+              Going
+            </Button>
+          </div>
         </div>
-        
-        {/* Going button */}
-        <Button 
-          className="w-full bg-white hover:bg-gray-100 text-gray-800 rounded-full py-6 mb-10"
-          disabled
-        >
-          Going
-        </Button>
         
         {/* Get the full experience section */}
         <div className="w-full bg-white rounded-xl p-4 flex items-center mb-4">
@@ -122,13 +127,16 @@ function Onboarding() {
           <img src={downloadButton} alt="Download on the App Store" className="h-10" />
         </a>
         
-        {/* App screenshot preview */}
-        <div className="w-full flex justify-center mt-4 relative">
-          <div className="w-32 h-20 bg-white rounded-lg shadow-lg flex items-center justify-center relative">
-            <div className="text-xs text-gray-400">App Preview</div>
-            <div className="absolute bottom-0 left-0 right-0 text-center text-[10px] text-gray-400 pb-1">
-              getspawn.com
-            </div>
+        {/* App screenshots preview - updated to show actual images */}
+        <div className="w-full flex justify-center mt-6 mb-4 space-x-2 relative">
+          <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
+            <img src={firstAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
+          </div>
+          <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
+            <img src={secondAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
+          </div>
+          <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
+            <img src={thirdAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
           </div>
         </div>
       </div>
