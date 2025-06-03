@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
-import events from "./assets/eventsgraphic.png"
+import activities from "./assets/eventsgraphic.png"
 import StarIcon from "./assets/staricon.svg"
 import { ToastContainer } from "@/components/ui/use-toast"
 
@@ -88,8 +88,8 @@ function App() {
   const herographic = (
     <div className="flex-1">
       <img
-        src={events}
-        alt="Events Graphic"
+        src={activities}
+        alt="Activities Graphic"
         className="w-full h-full object-cover rounded-lg"
         style={{ filter: "drop-shadow(0px 35px 25px rgba(134, 147, 255, 0.4))" }}
       />

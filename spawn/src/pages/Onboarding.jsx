@@ -17,13 +17,13 @@ function Onboarding() {
     document.title = "Spawn - You're In!";
   }, []);
 
-  // In a real app, you would fetch event details using the inviteId
-  const eventData = {
+  // In a real app, you would fetch activity details using the inviteId
+  const activityData = {
     inviter: "@haley_wong",
-    eventTitle: "Dinner @ Chipotle",
-    eventTime: "6 - 7:30pm",
-    eventLocation: "7386 Name Street",
-    eventDescription: "Come grab some dinner with us at Chipotle! Might go study at the library afterwards.",
+    activityTitle: "Dinner @ Chipotle",
+    activityTime: "6 - 7:30pm",
+    activityLocation: "7386 Name Street",
+    activityDescription: "Come grab some dinner with us at Chipotle! Might go study at the library afterwards.",
     attendees: 2, // Plus host
     additionalAttendees: 20
   };
@@ -58,11 +58,11 @@ function Onboarding() {
         {/* "You're In!" header */}
         <h1 className="text-4xl font-bold mb-6 mt-4">You're In!</h1>
         
-        {/* Event card */}
+        {/* Activity card */}
         <div className="w-full bg-spawn-purple/80 text-white rounded-2xl p-4 mb-6">
           <div className="mb-1">
-            <h2 className="text-2xl font-bold">{eventData.eventTitle}</h2>
-            <p className="text-sm">{eventData.eventTime}</p>
+            <h2 className="text-2xl font-bold">{activityData.activityTitle}</h2>
+            <p className="text-sm">{activityData.activityTime}</p>
           </div>
           
           {/* Location */}
@@ -71,7 +71,7 @@ function Onboarding() {
               <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" fill="white"/>
               <path d="M12 2C7.58172 2 4 5.58172 4 10C4 11.8487 4.63901 13.551 5.73046 14.9324L12 22L18.2695 14.9324C19.361 13.551 20 11.8487 20 10C20 5.58172 16.4183 2 12 2Z" stroke="white" strokeWidth="2"/>
             </svg>
-            <span className="text-sm">{eventData.eventLocation}</span>
+            <span className="text-sm">{activityData.activityLocation}</span>
           </div>
           
           {/* Attendees */}
@@ -85,7 +85,7 @@ function Onboarding() {
               </div>
             </div>
             <div className="ml-2 bg-white/20 rounded-full px-2 py-0.5 text-xs">
-              +{eventData.additionalAttendees}
+              +{activityData.additionalAttendees}
             </div>
           </div>
           
@@ -95,14 +95,14 @@ function Onboarding() {
               <div className="w-8 h-8 rounded-full bg-orange-300 flex items-center justify-center text-xs mr-2">
                 HW
               </div>
-              <div>{eventData.inviter}</div>
+              <div>{activityData.inviter}</div>
             </div>
             <p className="text-sm">
-              {eventData.eventDescription}
+              {activityData.activityDescription}
             </p>
           </div>
           
-          {/* Going button - moved inside the event card */}
+          {/* Going button - moved inside the activity card */}
           <div className="mt-4">
             <Button 
               className="w-full bg-white hover:bg-gray-100 text-gray-800 rounded-full py-6"
