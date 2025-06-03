@@ -28,6 +28,7 @@ createRoot(document.getElementById('root')).render(
             </PrivateRoute>
           } 
         />
+        <Route path="/activity/:activityId" element={<ActivityInvite />} />
         <Route path="/invite/:inviteId" element={<ActivityInvite />} />
         <Route path="/invite/:inviteId/sign-in" element={<GuestSignIn />} />
         <Route path="/onboarding" element={<Onboarding />} />
