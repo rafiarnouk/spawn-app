@@ -9,7 +9,7 @@ import firstAppImg from '@/assets/app_promo/first.png';
 import secondAppImg from '@/assets/app_promo/second.png';
 import thirdAppImg from '@/assets/app_promo/third.png';
 
-function EventInvite() {
+function ActivityInvite() {
   const { inviteId } = useParams();
   const navigate = useNavigate();
 
@@ -17,13 +17,13 @@ function EventInvite() {
     document.title = "Spawn - You've Been Invited!";
   }, []);
 
-  // In a real app, you would fetch event details using the inviteId
-  const eventData = {
+  // In a real app, you would fetch activity details using the inviteId
+  const activityData = {
     inviter: "@haley_wong",
-    eventTitle: "Dinner @ Chipotle",
-    eventTime: "6 - 7:30pm",
-    eventLocation: "7386 Name Street",
-    eventDescription: "Come grab some dinner with us at Chipotle! Might go study at the library afterwards.",
+    activityTitle: "Dinner @ Chipotle",
+    activityTime: "6 - 7:30pm",
+    activityLocation: "7386 Name Street",
+    activityDescription: "Come grab some dinner with us at Chipotle! Might go study at the library afterwards.",
     attendees: 2, // Plus host
     additionalAttendees: 20
   };
@@ -54,6 +54,7 @@ function EventInvite() {
               <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2"/>
               <path d="M15 12H12V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
+            getspawn.com
           </div>
         </div>
         <div className="w-8"></div>
@@ -76,16 +77,16 @@ function EventInvite() {
       <div className="px-6 pt-2 pb-4 text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">You've Been Invited!</h1>
         <p className="text-lg text-spawn-purple font-medium mb-4">
-          {eventData.inviter} wants you to spawn in.
+          {activityData.inviter} wants you to spawn in.
         </p>
       </div>
       
-      {/* Event card */}
+      {/* Activity card */}
       <div className="px-6 pb-6">
         <div className="bg-spawn-purple/80 text-white rounded-2xl p-4">
           <div className="mb-1">
-            <h2 className="text-2xl font-bold">{eventData.eventTitle}</h2>
-            <p className="text-sm">{eventData.eventTime}</p>
+            <h2 className="text-2xl font-bold">{activityData.activityTitle}</h2>
+            <p className="text-sm">{activityData.activityTime}</p>
           </div>
           
           {/* Location */}
@@ -94,7 +95,7 @@ function EventInvite() {
               <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" fill="white"/>
               <path d="M12 2C7.58172 2 4 5.58172 4 10C4 11.8487 4.63901 13.551 5.73046 14.9324L12 22L18.2695 14.9324C19.361 13.551 20 11.8487 20 10C20 5.58172 16.4183 2 12 2Z" stroke="white" strokeWidth="2"/>
             </svg>
-            <span className="text-sm">{eventData.eventLocation}</span>
+            <span className="text-sm">{activityData.activityLocation}</span>
           </div>
           
           {/* Attendees */}
@@ -108,7 +109,7 @@ function EventInvite() {
               </div>
             </div>
             <div className="ml-2 bg-white/20 rounded-full px-2 py-0.5 text-xs">
-              +{eventData.additionalAttendees}
+              +{activityData.additionalAttendees}
             </div>
           </div>
           
@@ -118,10 +119,10 @@ function EventInvite() {
               <div className="w-8 h-8 rounded-full bg-orange-300 flex items-center justify-center text-xs mr-2">
                 HW
               </div>
-              <div>{eventData.inviter}</div>
+              <div>{activityData.inviter}</div>
             </div>
             <p className="text-sm">
-              {eventData.eventDescription}
+              {activityData.activityDescription}
             </p>
           </div>
         </div>
@@ -180,7 +181,7 @@ function EventInvite() {
       {/* Desktop view with browser frame */}
       <div className="hidden md:block w-full">
         <div className="max-w-4xl mx-auto px-8 py-10 flex flex-col items-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Spawn Event Invitation</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Spawn Activity Invitation</h1>
           <BrowserFrame>
             <InviteContent />
           </BrowserFrame>
@@ -190,4 +191,4 @@ function EventInvite() {
   );
 }
 
-export default EventInvite; 
+export default ActivityInvite; 

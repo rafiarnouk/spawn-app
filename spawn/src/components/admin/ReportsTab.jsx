@@ -121,7 +121,7 @@ function ReportsTab() {
             >
               <option value="">All Content</option>
               <option value="USER">User</option>
-              <option value="EVENT">Event</option>
+              <option value="ACTIVITY">Activity</option>
               <option value="COMMENT">Comment</option>
             </select>
           </div>

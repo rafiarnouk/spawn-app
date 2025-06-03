@@ -5,7 +5,7 @@ import './index.css'
 import App from './App.jsx'
 import Admin from './pages/Admin.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
-import EventInvite from './pages/EventInvite.jsx'
+import ActivityInvite from './pages/ActivityInvite.jsx'
 import GuestSignIn from './pages/GuestSignIn.jsx'
 import Login from './pages/Login.jsx'
 import Onboarding from './pages/Onboarding.jsx'
@@ -28,7 +28,7 @@ createRoot(document.getElementById('root')).render(
             </PrivateRoute>
           } 
         />
-        <Route path="/invite/:inviteId" element={<EventInvite />} />
+        <Route path="/invite/:inviteId" element={<ActivityInvite />} />
         <Route path="/invite/:inviteId/sign-in" element={<GuestSignIn />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/invite/:inviteId/onboarding" element={<Onboarding />} />
