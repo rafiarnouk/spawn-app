@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -10,27 +10,92 @@ import secondAppImg from '@/assets/app_promo/second.png';
 import thirdAppImg from '@/assets/app_promo/third.png';
 
 function ActivityInvite() {
-  const { inviteId } = useParams();
+  const { inviteId, activityId } = useParams();
   const navigate = useNavigate();
+  const [activityData, setActivityData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Determine which ID to use (activityId from new route or inviteId from legacy route)
+  const currentActivityId = activityId || inviteId;
 
   useEffect(() => {
     document.title = "Spawn - You've Been Invited!";
-  }, []);
+    fetchActivityData();
+  }, [currentActivityId]);
 
-  // In a real app, you would fetch activity details using the inviteId
-  const activityData = {
-    inviter: "@haley_wong",
-    activityTitle: "Dinner @ Chipotle",
-    activityTime: "6 - 7:30pm",
-    activityLocation: "7386 Name Street",
-    activityDescription: "Come grab some dinner with us at Chipotle! Might go study at the library afterwards.",
-    attendees: 2, // Plus host
-    additionalAttendees: 20
+  const fetchActivityData = async () => {
+    if (!currentActivityId) {
+      setError('No activity ID provided');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Use environment variable for API URL, fallback to the production URL
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://spawn-app-back-end-production.up.railway.app';
+      
+      // Create a dummy requesting user ID for now (in a real implementation, this would be handled properly)
+      const dummyRequestingUserId = '00000000-0000-0000-0000-000000000000';
+      
+      const response = await fetch(
+        `${apiBaseUrl}/api/v1/Activities/${currentActivityId}?requestingUserId=${dummyRequestingUserId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setActivityData(data);
+      } else if (response.status === 404) {
+        setError('Activity not found or no longer available');
+      } else {
+        setError('Failed to load activity details');
+      }
+    } catch (err) {
+      console.error('Error fetching activity:', err);
+      setError('Failed to load activity details');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSpawnIn = () => {
-    // Redirect to guest sign-in page with the inviteId
-    navigate(`/invite/${inviteId}/sign-in`);
+    // Redirect to guest sign-in page with the activity ID
+    navigate(`/invite/${currentActivityId}/sign-in`);
+  };
+
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'Time TBD';
+    
+    try {
+      const date = new Date(dateTimeString);
+      const dateStr = date.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      const timeStr = date.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      });
+      return `${dateStr} at ${timeStr}`;
+    } catch (err) {
+      return dateTimeString;
+    }
+  };
+
+  const getInitials = (name) => {
+    if (!name) return '??';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   // Gradient background style
@@ -63,113 +128,170 @@ function ActivityInvite() {
     </div>
   );
 
-  const InviteContent = () => (
+  const LoadingContent = () => (
     <div className="max-w-md w-full bg-white rounded-3xl shadow-lg overflow-hidden mx-auto">
-      {/* Logo section */}
-      <div className="p-6 pb-2 text-center">
-        <div className="text-spawn-purple text-3xl font-bold relative">
+      <div className="p-6 text-center">
+        <div className="text-spawn-purple text-3xl font-bold relative mb-8">
           spawn
           <span className="absolute text-spawn-purple text-2xl" style={{ right: "-12px", top: "-5px" }}>⭐</span>
         </div>
-      </div>
-      
-      {/* Invitation header */}
-      <div className="px-6 pt-2 pb-4 text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">You've Been Invited!</h1>
-        <p className="text-lg text-spawn-purple font-medium mb-4">
-          {activityData.inviter} wants you to spawn in.
-        </p>
-      </div>
-      
-      {/* Activity card */}
-      <div className="px-6 pb-6">
-        <div className="bg-spawn-purple/80 text-white rounded-2xl p-4">
-          <div className="mb-1">
-            <h2 className="text-2xl font-bold">{activityData.activityTitle}</h2>
-            <p className="text-sm">{activityData.activityTime}</p>
-          </div>
-          
-          {/* Location */}
-          <div className="flex items-center bg-spawn-purple/60 rounded-full px-3 py-1 mb-4 w-fit">
-            <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" fill="white"/>
-              <path d="M12 2C7.58172 2 4 5.58172 4 10C4 11.8487 4.63901 13.551 5.73046 14.9324L12 22L18.2695 14.9324C19.361 13.551 20 11.8487 20 10C20 5.58172 16.4183 2 12 2Z" stroke="white" strokeWidth="2"/>
-            </svg>
-            <span className="text-sm">{activityData.activityLocation}</span>
-          </div>
-          
-          {/* Attendees */}
-          <div className="flex items-center mb-4">
-            <div className="flex -space-x-2">
-              <div className="w-8 h-8 rounded-full bg-orange-300 border-2 border-white flex items-center justify-center text-xs">
-                HW
-              </div>
-              <div className="w-8 h-8 rounded-full bg-purple-300 border-2 border-white flex items-center justify-center text-xs">
-                AS
-              </div>
-            </div>
-            <div className="ml-2 bg-white/20 rounded-full px-2 py-0.5 text-xs">
-              +{activityData.additionalAttendees}
-            </div>
-          </div>
-          
-          {/* Host and description */}
-          <div className="mt-2">
-            <div className="flex items-center mb-2">
-              <div className="w-8 h-8 rounded-full bg-orange-300 flex items-center justify-center text-xs mr-2">
-                HW
-              </div>
-              <div>{activityData.inviter}</div>
-            </div>
-            <p className="text-sm">
-              {activityData.activityDescription}
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Action button */}
-      <div className="px-6 pb-8 text-center">
-        <Button 
-          className="w-full bg-spawn-purple hover:bg-spawn-purple/90 rounded-full py-6 text-white text-lg font-medium"
-          onClick={handleSpawnIn}
-        >
-          Spawn In!
-        </Button>
-        
-        <p className="text-sm text-gray-600 mt-4 mb-8">
-          Let them know you're coming — spawn in to continue.
-        </p>
-        
-        {/* Get the full experience section */}
-        <div className="w-full bg-gray-100 rounded-xl p-4 flex items-center mb-4">
-          <img src={appLogo} alt="Spawn App" className="w-12 h-12 mr-3" />
-          <div className="flex-1">
-            <h3 className="font-medium text-sm">Get the full experience</h3>
-            <p className="text-xs text-gray-600">More features, better coordination, and the full crew in one place.</p>
-          </div>
-        </div>
-        
-        {/* App Store download button */}
-        <a href="https://getspawn.com" target="_blank" rel="noopener noreferrer" className="inline-block">
-          <img src={downloadButton} alt="Download on the App Store" className="h-10" />
-        </a>
-        
-        {/* App screenshots preview */}
-        <div className="w-full flex justify-center mt-6 mb-4 space-x-2 relative">
-          <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
-            <img src={firstAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
-          </div>
-          <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
-            <img src={secondAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
-          </div>
-          <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
-            <img src={thirdAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
-          </div>
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded mb-8"></div>
+          <div className="h-32 bg-gray-200 rounded mb-6"></div>
+          <div className="h-12 bg-gray-200 rounded"></div>
         </div>
       </div>
     </div>
   );
+
+  const ErrorContent = () => (
+    <div className="max-w-md w-full bg-white rounded-3xl shadow-lg overflow-hidden mx-auto">
+      <div className="p-6 text-center">
+        <div className="text-spawn-purple text-3xl font-bold relative mb-8">
+          spawn
+          <span className="absolute text-spawn-purple text-2xl" style={{ right: "-12px", top: "-5px" }}>⭐</span>
+        </div>
+        <div className="text-red-600 mb-4">
+          <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Unable to Load Activity</h2>
+          <p className="text-gray-600">{error}</p>
+        </div>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="bg-spawn-purple hover:bg-spawn-purple/90 rounded-full py-2 px-6"
+        >
+          Try Again
+        </Button>
+      </div>
+    </div>
+  );
+
+  const InviteContent = () => {
+    if (loading) return <LoadingContent />;
+    if (error || !activityData) return <ErrorContent />;
+
+    const creatorName = activityData.creatorName || 'Someone';
+    const creatorUsername = activityData.creatorUsername || '@user';
+    
+    return (
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-lg overflow-hidden mx-auto">
+        {/* Logo section */}
+        <div className="p-6 pb-2 text-center">
+          <div className="text-spawn-purple text-3xl font-bold relative">
+            spawn
+            <span className="absolute text-spawn-purple text-2xl" style={{ right: "-12px", top: "-5px" }}>⭐</span>
+          </div>
+        </div>
+        
+        {/* Invitation header */}
+        <div className="px-6 pt-2 pb-4 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">You've Been Invited!</h1>
+          <p className="text-lg text-spawn-purple font-medium mb-4">
+            {creatorUsername} wants you to spawn in.
+          </p>
+        </div>
+        
+        {/* Activity card */}
+        <div className="px-6 pb-6">
+          <div className="bg-spawn-purple/80 text-white rounded-2xl p-4">
+            <div className="mb-1">
+              <h2 className="text-2xl font-bold">{activityData.title || 'Untitled Activity'}</h2>
+              <p className="text-sm">{formatDateTime(activityData.startDateTime)}</p>
+            </div>
+            
+            {/* Location */}
+            {activityData.location && (
+              <div className="flex items-center bg-spawn-purple/60 rounded-full px-3 py-1 mb-4 w-fit">
+                <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" fill="white"/>
+                  <path d="M12 2C7.58172 2 4 5.58172 4 10C4 11.8487 4.63901 13.551 5.73046 14.9324L12 22L18.2695 14.9324C19.361 13.551 20 11.8487 20 10C20 5.58172 16.4183 2 12 2Z" stroke="white" strokeWidth="2"/>
+                </svg>
+                <span className="text-sm">{activityData.location}</span>
+              </div>
+            )}
+            
+            {/* Attendees */}
+            <div className="flex items-center mb-4">
+              <div className="flex -space-x-2">
+                <div className="w-8 h-8 rounded-full bg-orange-300 border-2 border-white flex items-center justify-center text-xs">
+                  {getInitials(creatorName)}
+                </div>
+                {activityData.attendees && activityData.attendees.slice(0, 2).map((attendee, index) => (
+                  <div key={index} className="w-8 h-8 rounded-full bg-purple-300 border-2 border-white flex items-center justify-center text-xs">
+                    {getInitials(attendee.name || attendee.username)}
+                  </div>
+                ))}
+              </div>
+              {activityData.totalAttendees > 3 && (
+                <div className="ml-2 bg-white/20 rounded-full px-2 py-0.5 text-xs">
+                  +{activityData.totalAttendees - 3}
+                </div>
+              )}
+            </div>
+            
+            {/* Host and description */}
+            <div className="mt-2">
+              <div className="flex items-center mb-2">
+                <div className="w-8 h-8 rounded-full bg-orange-300 flex items-center justify-center text-xs mr-2">
+                  {getInitials(creatorName)}
+                </div>
+                <div>{creatorUsername}</div>
+              </div>
+              {activityData.description && (
+                <p className="text-sm">
+                  {activityData.description}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Action button */}
+        <div className="px-6 pb-8 text-center">
+          <Button 
+            className="w-full bg-spawn-purple hover:bg-spawn-purple/90 rounded-full py-6 text-white text-lg font-medium"
+            onClick={handleSpawnIn}
+          >
+            Spawn In!
+          </Button>
+          
+          <p className="text-sm text-gray-600 mt-4 mb-8">
+            Let them know you're coming — spawn in to continue.
+          </p>
+          
+          {/* Get the full experience section */}
+          <div className="w-full bg-gray-100 rounded-xl p-4 flex items-center mb-4">
+            <img src={appLogo} alt="Spawn App" className="w-12 h-12 mr-3" />
+            <div className="flex-1">
+              <h3 className="font-medium text-sm">Get the full experience</h3>
+              <p className="text-xs text-gray-600">More features, better coordination, and the full crew in one place.</p>
+            </div>
+          </div>
+          
+          {/* App Store download button */}
+          <a href="https://getspawn.com" target="_blank" rel="noopener noreferrer" className="inline-block">
+            <img src={downloadButton} alt="Download on the App Store" className="h-10" />
+          </a>
+          
+          {/* App screenshots preview */}
+          <div className="w-full flex justify-center mt-6 mb-4 space-x-2 relative">
+            <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
+              <img src={firstAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
+            </div>
+            <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
+              <img src={secondAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
+            </div>
+            <div className="relative w-24 h-48 overflow-hidden rounded-xl shadow-md">
+              <img src={thirdAppImg} alt="Spawn App Screenshot" className="w-full h-full object-cover" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div style={bgGradient} className="flex flex-col items-center justify-center min-h-screen p-4">
