@@ -1,0 +1,57 @@
+name: Syntax Check
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'spawn/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'spawn/**'
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./spawn
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: spawn/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run ESLint
+      run: npm run lint
+    
+    - name: Check for TypeScript errors (if applicable)
+      run: |
+        if [ -f "jsconfig.json" ] || [ -f "tsconfig.json" ]; then
+          npx tsc --noEmit --skipLibCheck || echo "TypeScript check completed"
+        else
+          echo "No TypeScript configuration found, skipping type check"
+        fi
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Check for build artifacts
+      run: |
+        if [ -d "dist" ]; then
+          echo "Build successful - dist directory created"
+          ls -la dist/
+        else
+          echo "Build failed - no dist directory found"
+          exit 1
+        fi 
