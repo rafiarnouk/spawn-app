@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from 'react-router-dom';
+import { mapBackendToActivityInvite, isValidActivityInvite } from '@/types/ActivityInviteTypes';
+import PropTypes from 'prop-types';
 
 // Import app promo assets
 import appLogo from '@/assets/app_promo/app_logo.png';
@@ -38,11 +40,8 @@ function ActivityInvite() {
       // Use environment variable for API URL, fallback to the production URL
       const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://spawn-app-back-end-production.up.railway.app';
       
-      // Create a dummy requesting user ID for now (in a real implementation, this would be handled properly)
-      const dummyRequestingUserId = '00000000-0000-0000-0000-000000000000';
-      
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/Activities/${currentActivityId}?requestingUserId=${dummyRequestingUserId}`,
+        `${apiBaseUrl}/api/v1/activities/${currentActivityId}?isActivityExternalInvite=true`,
         {
           method: 'GET',
           headers: {
@@ -53,7 +52,14 @@ function ActivityInvite() {
 
       if (response.ok) {
         const data = await response.json();
-        setActivityData(data);
+        
+        // Validate and map the data
+        if (isValidActivityInvite(data)) {
+          const mappedData = mapBackendToActivityInvite(data);
+          setActivityData(mappedData);
+        } else {
+          setError('Invalid activity data received');
+        }
       } else if (response.status === 404) {
         setError('Activity not found or no longer available');
       } else {
@@ -88,7 +94,7 @@ function ActivityInvite() {
         hour12: true 
       });
       return `${dateStr} at ${timeStr}`;
-    } catch (err) {
+    } catch {
       return dateTimeString;
     }
   };
@@ -96,6 +102,47 @@ function ActivityInvite() {
   const getInitials = (name) => {
     if (!name) return '??';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  // Function to render user avatar with profile picture fallback
+  const UserAvatar = ({ user, creatorName, size = 'w-8 h-8', className = '' }) => {
+    const displayName = user?.name || user?.username || creatorName;
+    const profilePicture = user?.profilePicture;
+    
+    return (
+      <div className={`${size} rounded-full border-2 border-white flex items-center justify-center overflow-hidden ${className}`}>
+        {profilePicture ? (
+          <img 
+            src={profilePicture} 
+            alt={displayName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to initials if image fails to load
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div 
+          className={`w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-xs font-medium text-white ${profilePicture ? 'hidden' : 'flex'}`}
+          style={{ display: profilePicture ? 'none' : 'flex' }}
+        >
+          {getInitials(displayName)}
+        </div>
+      </div>
+    );
+  };
+
+  UserAvatar.propTypes = {
+    user: PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      username: PropTypes.string,
+      profilePicture: PropTypes.string
+    }),
+    creatorName: PropTypes.string,
+    size: PropTypes.string,
+    className: PropTypes.string
   };
 
   // Gradient background style
@@ -127,6 +174,10 @@ function ActivityInvite() {
       {children}
     </div>
   );
+
+  BrowserFrame.propTypes = {
+    children: PropTypes.node.isRequired
+  };
 
   const LoadingContent = () => (
     <div className="max-w-md w-full bg-white rounded-3xl shadow-lg overflow-hidden mx-auto">
@@ -188,7 +239,7 @@ function ActivityInvite() {
         
         {/* Invitation header */}
         <div className="px-6 pt-2 pb-4 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">You've Been Invited!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">You&apos;ve Been Invited!</h1>
           <p className="text-lg text-spawn-purple font-medium mb-4">
             {creatorUsername} wants you to spawn in.
           </p>
@@ -197,9 +248,18 @@ function ActivityInvite() {
         {/* Activity card */}
         <div className="px-6 pb-6">
           <div className="bg-spawn-purple/80 text-white rounded-2xl p-4">
-            <div className="mb-1">
-              <h2 className="text-2xl font-bold">{activityData.title || 'Untitled Activity'}</h2>
-              <p className="text-sm">{formatDateTime(activityData.startDateTime)}</p>
+            {/* Activity header with icon */}
+            <div className="mb-4">
+              <div className="flex items-center mb-2">
+                {activityData.icon && (
+                  <span className="text-2xl mr-2">{activityData.icon}</span>
+                )}
+                <h2 className="text-2xl font-bold flex-1">{activityData.title || 'Untitled Activity'}</h2>
+              </div>
+              <p className="text-sm opacity-90">{formatDateTime(activityData.startTime)}</p>
+              {activityData.endTime && activityData.endTime !== activityData.startTime && (
+                <p className="text-xs opacity-75">Ends: {formatDateTime(activityData.endTime)}</p>
+              )}
             </div>
             
             {/* Location */}
@@ -213,37 +273,73 @@ function ActivityInvite() {
               </div>
             )}
             
-            {/* Attendees */}
-            <div className="flex items-center mb-4">
-              <div className="flex -space-x-2">
-                <div className="w-8 h-8 rounded-full bg-orange-300 border-2 border-white flex items-center justify-center text-xs">
-                  {getInitials(creatorName)}
-                </div>
-                {activityData.attendees && activityData.attendees.slice(0, 2).map((attendee, index) => (
-                  <div key={index} className="w-8 h-8 rounded-full bg-purple-300 border-2 border-white flex items-center justify-center text-xs">
-                    {getInitials(attendee.name || attendee.username)}
-                  </div>
-                ))}
+            {/* Attendees section */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium opacity-90">
+                  {activityData.totalAttendees === 1 ? '1 person' : `${activityData.totalAttendees} people`} spawning in
+                </span>
               </div>
-              {activityData.totalAttendees > 3 && (
-                <div className="ml-2 bg-white/20 rounded-full px-2 py-0.5 text-xs">
-                  +{activityData.totalAttendees - 3}
+              
+              <div className="flex items-center">
+                <div className="flex -space-x-2">
+                  {/* Creator avatar - always show first */}
+                  <UserAvatar 
+                    user={{ name: creatorName, profilePicture: null }} 
+                    creatorName={creatorName}
+                    className="bg-gradient-to-br from-orange-400 to-orange-500"
+                  />
+                  
+                  {/* Show attendees (excluding creator) */}
+                  {activityData.attendees && activityData.attendees.slice(0, 4).map((attendee, index) => (
+                    <UserAvatar 
+                      key={attendee.id || index}
+                      user={attendee}
+                      className="bg-gradient-to-br from-purple-400 to-purple-600"
+                    />
+                  ))}
                 </div>
-              )}
+                
+                {/* Show remaining count */}
+                {activityData.totalAttendees > 5 && (
+                  <div className="ml-2 bg-white/20 rounded-full px-2 py-0.5 text-xs font-medium">
+                    +{activityData.totalAttendees - 5}
+                  </div>
+                )}
+              </div>
             </div>
             
-            {/* Host and description */}
-            <div className="mt-2">
+            {/* Host section */}
+            <div className="border-t border-white/20 pt-3 mt-3">
               <div className="flex items-center mb-2">
-                <div className="w-8 h-8 rounded-full bg-orange-300 flex items-center justify-center text-xs mr-2">
-                  {getInitials(creatorName)}
+                <UserAvatar 
+                  user={{ name: creatorName, profilePicture: null }}
+                  creatorName={creatorName}
+                  size="w-8 h-8"
+                  className="bg-gradient-to-br from-orange-400 to-orange-500 mr-2"
+                />
+                <div className="flex-1">
+                  <div className="text-sm font-medium">Hosted by {creatorName}</div>
+                  <div className="text-xs opacity-75">{creatorUsername}</div>
                 </div>
-                <div>{creatorUsername}</div>
               </div>
+              
+              {/* Description */}
               {activityData.description && (
-                <p className="text-sm">
-                  {activityData.description}
-                </p>
+                <div className="mt-2">
+                  <p className="text-sm opacity-90 leading-relaxed">
+                    {activityData.description}
+                  </p>
+                </div>
+              )}
+              
+              {/* Activity category */}
+              {activityData.category && (
+                <div className="mt-2">
+                  <span className="inline-block bg-white/20 rounded-full px-2 py-1 text-xs capitalize">
+                    {activityData.category.toLowerCase().replace('_', ' ')}
+                  </span>
+                </div>
               )}
             </div>
           </div>
@@ -259,7 +355,7 @@ function ActivityInvite() {
           </Button>
           
           <p className="text-sm text-gray-600 mt-4 mb-8">
-            Let them know you're coming — spawn in to continue.
+            Let them know you&apos;re coming — spawn in to continue.
           </p>
           
           {/* Get the full experience section */}
