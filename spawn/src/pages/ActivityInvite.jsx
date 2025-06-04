@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from 'react-router-dom';
+import { mapBackendToActivityInvite, isValidActivityInvite } from '@/types/ActivityInviteTypes';
+import PropTypes from 'prop-types';
 
 // Import app promo assets
 import appLogo from '@/assets/app_promo/app_logo.png';
@@ -38,11 +40,8 @@ function ActivityInvite() {
       // Use environment variable for API URL, fallback to the production URL
       const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://spawn-app-back-end-production.up.railway.app';
       
-      // Create a dummy requesting user ID for now (in a real implementation, this would be handled properly)
-      const dummyRequestingUserId = '00000000-0000-0000-0000-000000000000';
-      
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/Activities/${currentActivityId}?requestingUserId=${dummyRequestingUserId}`,
+        `${apiBaseUrl}/api/v1/activities/${currentActivityId}?isActivityExternalInvite=true`,
         {
           method: 'GET',
           headers: {
@@ -53,7 +52,14 @@ function ActivityInvite() {
 
       if (response.ok) {
         const data = await response.json();
-        setActivityData(data);
+        
+        // Validate and map the data
+        if (isValidActivityInvite(data)) {
+          const mappedData = mapBackendToActivityInvite(data);
+          setActivityData(mappedData);
+        } else {
+          setError('Invalid activity data received');
+        }
       } else if (response.status === 404) {
         setError('Activity not found or no longer available');
       } else {
@@ -88,7 +94,7 @@ function ActivityInvite() {
         hour12: true 
       });
       return `${dateStr} at ${timeStr}`;
-    } catch (err) {
+    } catch {
       return dateTimeString;
     }
   };
@@ -127,6 +133,10 @@ function ActivityInvite() {
       {children}
     </div>
   );
+
+  BrowserFrame.propTypes = {
+    children: PropTypes.node.isRequired
+  };
 
   const LoadingContent = () => (
     <div className="max-w-md w-full bg-white rounded-3xl shadow-lg overflow-hidden mx-auto">
@@ -188,7 +198,7 @@ function ActivityInvite() {
         
         {/* Invitation header */}
         <div className="px-6 pt-2 pb-4 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">You've Been Invited!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">You&apos;ve Been Invited!</h1>
           <p className="text-lg text-spawn-purple font-medium mb-4">
             {creatorUsername} wants you to spawn in.
           </p>
@@ -199,7 +209,7 @@ function ActivityInvite() {
           <div className="bg-spawn-purple/80 text-white rounded-2xl p-4">
             <div className="mb-1">
               <h2 className="text-2xl font-bold">{activityData.title || 'Untitled Activity'}</h2>
-              <p className="text-sm">{formatDateTime(activityData.startDateTime)}</p>
+              <p className="text-sm">{formatDateTime(activityData.startTime)}</p>
             </div>
             
             {/* Location */}
@@ -259,7 +269,7 @@ function ActivityInvite() {
           </Button>
           
           <p className="text-sm text-gray-600 mt-4 mb-8">
-            Let them know you're coming — spawn in to continue.
+            Let them know you&apos;re coming — spawn in to continue.
           </p>
           
           {/* Get the full experience section */}
