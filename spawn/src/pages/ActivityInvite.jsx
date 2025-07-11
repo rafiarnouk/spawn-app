@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from 'react-router-dom';
 import { mapBackendToActivityInvite, isValidActivityInvite } from '@/types/ActivityInviteTypes';
+import { handleActivityInvite, openAppStore } from '@/lib/utils';
 import PropTypes from 'prop-types';
 
 // Import app promo assets
@@ -21,12 +22,7 @@ function ActivityInvite() {
   // Use the activityId from the URL parameters
   const currentActivityId = activityId;
 
-  useEffect(() => {
-    document.title = "Spawn - You've Been Invited!";
-    fetchActivityData();
-  }, [currentActivityId]);
-
-  const fetchActivityData = async () => {
+  const fetchActivityData = useCallback(async () => {
     if (!currentActivityId) {
       setError('No activity ID provided');
       setLoading(false);
@@ -84,12 +80,20 @@ function ActivityInvite() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentActivityId]);
 
-  const handleSpawnIn = () => {
-    // Navigate to guest sign-in page with the activity ID
-    // Universal Links will automatically open the app if installed
-    navigate(`/activity/${currentActivityId}/sign-in`);
+  useEffect(() => {
+    document.title = "Spawn - You've Been Invited!";
+    fetchActivityData();
+  }, [fetchActivityData]);
+
+  const handleSpawnIn = async () => {
+    // Use the new utility function to handle app installation detection
+    await handleActivityInvite(currentActivityId, () => {
+      // Navigate to guest sign-in page with the activity ID
+      // Universal Links will automatically open the app if installed
+      navigate(`/activity/${currentActivityId}/sign-in`);
+    });
   };
 
   const formatDateTime = (dateTimeString) => {
@@ -382,9 +386,9 @@ function ActivityInvite() {
           </div>
           
           {/* App Store download button */}
-          <a href="https://getspawn.com" target="_blank" rel="noopener noreferrer" className="inline-block">
+          <button onClick={openAppStore} className="inline-block">
             <img src={downloadButton} alt="Download on the App Store" className="h-10" />
-          </a>
+          </button>
           
           {/* App screenshots preview */}
           <div className="w-full flex justify-center mt-6 mb-4 space-x-2 relative">

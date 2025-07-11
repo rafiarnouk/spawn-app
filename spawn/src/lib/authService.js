@@ -109,7 +109,7 @@ export const authenticatedRequest = async (url, options = {}) => {
         // Retry with new token
         requestOptions.headers.Authorization = localStorage.getItem('accessToken');
         response = await fetch(url, requestOptions);
-      } catch (refreshError) {
+      } catch (error) {
         // If refresh fails, force logout
         logout();
         throw new Error('Authentication expired. Please login again.');
@@ -121,8 +121,8 @@ export const authenticatedRequest = async (url, options = {}) => {
     }
     
     return response;
-  } catch (error) {
-    console.error('Authenticated request error:', error);
-    throw error;
+  } catch (err) {
+    console.error('Authenticated request error:', err);
+    throw err;
   }
 }; 

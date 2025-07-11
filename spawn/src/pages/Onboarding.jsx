@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from 'react-router-dom';
 import { mapBackendToActivityInvite, isValidActivityInvite } from '@/types/ActivityInviteTypes';
@@ -17,12 +17,7 @@ function Onboarding() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    document.title = "Spawn - You're In!";
-    fetchActivityData();
-  }, [activityId]);
-
-  const fetchActivityData = async () => {
+  const fetchActivityData = useCallback(async () => {
     if (!activityId) {
       setError('No activity ID provided');
       setLoading(false);
@@ -64,7 +59,12 @@ function Onboarding() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activityId]);
+
+  useEffect(() => {
+    document.title = "Spawn - You&apos;re In!";
+    fetchActivityData();
+  }, [fetchActivityData]);
 
   const formatDateTime = (dateTimeString) => {
     if (!dateTimeString) return 'Time TBD';
@@ -158,7 +158,7 @@ function Onboarding() {
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center px-4 pb-8">
         {/* "You're In!" header */}
-        <h1 className="text-4xl font-bold mb-6 mt-4">You're In!</h1>
+        <h1 className="text-4xl font-bold mb-6 mt-4">You&apos;re In!</h1>
         
         {/* Activity card */}
         <div className="w-full bg-spawn-purple/80 text-white rounded-2xl p-4 mb-6">
@@ -234,7 +234,7 @@ function Onboarding() {
               className="w-full bg-white hover:bg-gray-100 text-gray-800 rounded-full py-6"
               disabled
             >
-              ✓ You're Going
+              ✓ You&apos;re Going
             </Button>
           </div>
         </div>
