@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from 'react-router-dom';
 import { mapBackendToActivityInvite, isValidActivityInvite } from '@/types/ActivityInviteTypes';
+import { handleActivityInvite, openAppStore } from '@/lib/utils';
 import PropTypes from 'prop-types';
 
 // Import app promo assets
@@ -12,21 +13,16 @@ import secondAppImg from '@/assets/app_promo/second.png';
 import thirdAppImg from '@/assets/app_promo/third.png';
 
 function ActivityInvite() {
-  const { inviteId, activityId } = useParams();
+  const { activityId } = useParams();
   const navigate = useNavigate();
   const [activityData, setActivityData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Determine which ID to use (activityId from new route or inviteId from legacy route)
-  const currentActivityId = activityId || inviteId;
+  // Use the activityId from the URL parameters
+  const currentActivityId = activityId;
 
-  useEffect(() => {
-    document.title = "Spawn - You've Been Invited!";
-    fetchActivityData();
-  }, [currentActivityId]);
-
-  const fetchActivityData = async () => {
+  const fetchActivityData = useCallback(async () => {
     if (!currentActivityId) {
       setError('No activity ID provided');
       setLoading(false);
@@ -37,8 +33,10 @@ function ActivityInvite() {
       setLoading(true);
       setError(null);
       
-      // Use environment variable for API URL, fallback to the production URL
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://spawn-app-back-end-production.up.railway.app';
+      // Use production backend URL
+      const apiBaseUrl = 'https://spawn-app-back-end-production.up.railway.app';
+      
+      console.log(`Fetching activity data from: ${apiBaseUrl}/api/v1/activities/${currentActivityId}`);
       
       const response = await fetch(
         `${apiBaseUrl}/api/v1/activities/${currentActivityId}?isActivityExternalInvite=true`,
@@ -52,30 +50,50 @@ function ActivityInvite() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Received activity data:', data);
         
         // Validate and map the data
         if (isValidActivityInvite(data)) {
           const mappedData = mapBackendToActivityInvite(data);
           setActivityData(mappedData);
         } else {
+          console.error('Invalid activity data structure:', data);
           setError('Invalid activity data received');
         }
       } else if (response.status === 404) {
+        console.error('Activity not found:', currentActivityId);
         setError('Activity not found or no longer available');
+      } else if (response.status === 401) {
+        console.error('Unauthorized access to activity:', currentActivityId);
+        setError('This invite link may have expired or is not publicly accessible');
+      } else {
+        console.error('Failed to fetch activity:', response.status, response.statusText);
+        setError(`Failed to load activity details (${response.status})`);
+      }
+    } catch (err) {
+      console.error('Network error fetching activity:', err);
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setError('Unable to connect to the server. Please check your internet connection or try again later.');
       } else {
         setError('Failed to load activity details');
       }
-    } catch (err) {
-      console.error('Error fetching activity:', err);
-      setError('Failed to load activity details');
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentActivityId]);
 
-  const handleSpawnIn = () => {
-    // Redirect to guest sign-in page with the activity ID
-    navigate(`/invite/${currentActivityId}/sign-in`);
+  useEffect(() => {
+    document.title = "Spawn - You've Been Invited!";
+    fetchActivityData();
+  }, [fetchActivityData]);
+
+  const handleSpawnIn = async () => {
+    // Use the new utility function to handle app installation detection
+    await handleActivityInvite(currentActivityId, () => {
+      // Navigate to guest sign-in page with the activity ID
+      // Universal Links will automatically open the app if installed
+      navigate(`/activity/${currentActivityId}/sign-in`);
+    });
   };
 
   const formatDateTime = (dateTimeString) => {
@@ -368,9 +386,9 @@ function ActivityInvite() {
           </div>
           
           {/* App Store download button */}
-          <a href="https://getspawn.com" target="_blank" rel="noopener noreferrer" className="inline-block">
+          <button onClick={openAppStore} className="inline-block">
             <img src={downloadButton} alt="Download on the App Store" className="h-10" />
-          </a>
+          </button>
           
           {/* App screenshots preview */}
           <div className="w-full flex justify-center mt-6 mb-4 space-x-2 relative">

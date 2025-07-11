@@ -29,10 +29,9 @@ createRoot(document.getElementById('root')).render(
           } 
         />
         <Route path="/activity/:activityId" element={<ActivityInvite />} />
-        <Route path="/invite/:inviteId" element={<ActivityInvite />} />
-        <Route path="/invite/:inviteId/sign-in" element={<GuestSignIn />} />
+        <Route path="/activity/:activityId/sign-in" element={<GuestSignIn />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/invite/:inviteId/onboarding" element={<Onboarding />} />
+        <Route path="/activity/:activityId/onboarding" element={<Onboarding />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

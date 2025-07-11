@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import logo from "../assets/spawnlogo.png"
 
 function Navbar() {

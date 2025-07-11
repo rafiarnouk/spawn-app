@@ -463,7 +463,7 @@ function FeedbackTab() {
           <DialogHeader>
             <DialogTitle>Mark as In Progress</DialogTitle>
             <DialogDescription>
-              Mark this feedback as in progress and optionally add a comment about what's being done.
+              Mark this feedback as in progress and optionally add a comment about what&apos;s being done.
             </DialogDescription>
           </DialogHeader>
           
@@ -482,7 +482,7 @@ function FeedbackTab() {
                   id="progress-comment"
                   value={resolutionComment} 
                   onChange={(e) => setResolutionComment(e.target.value)}
-                  placeholder="Enter details about what's being done..."
+                  placeholder="Enter details about what&apos;s being done..."
                   rows={4}
                 />
               </div>

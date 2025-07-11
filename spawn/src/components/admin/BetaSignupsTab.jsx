@@ -6,7 +6,6 @@ import { authenticatedRequest } from '@/lib/authService';
 
 function BetaSignupsTab() {
   const [signups, setSignups] = useState([]);
-  const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [startDate, setStartDate] = useState(null);
@@ -16,7 +15,6 @@ function BetaSignupsTab() {
 
   useEffect(() => {
     fetchBetaSignups();
-    fetchEmails();
   }, []);
 
   const fetchBetaSignups = async () => {
@@ -36,17 +34,7 @@ function BetaSignupsTab() {
     }
   };
 
-  const fetchEmails = async () => {
-    try {
-      const response = await authenticatedRequest(
-        `${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp/emails`
-      );
-      const data = await response.json();
-      setEmails(data);
-    } catch (err) {
-      console.error('Failed to fetch emails', err);
-    }
-  };
+
 
   // Function to update the emailed status of a signup
   const updateEmailedStatus = async (id, hasBeenEmailed) => {

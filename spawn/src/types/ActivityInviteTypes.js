@@ -64,7 +64,7 @@ export const isValidActivityInvite = (obj) => {
   // Check required fields exist and are of correct type
   const requiredFields = ['id', 'title', 'creatorName', 'creatorUsername'];
   const hasRequiredFields = requiredFields.every(field => 
-    obj.hasOwnProperty(field) && typeof obj[field] === 'string'
+    Object.prototype.hasOwnProperty.call(obj, field) && typeof obj[field] === 'string'
   );
   
   // Validate attendees array if present

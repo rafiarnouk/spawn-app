@@ -1,0 +1,164 @@
+{
+  "rules": [
+    {
+      "name": "comprehensive-lint-check",
+      "description": "Comprehensive linting check after any code changes to prevent CI failures",
+      "trigger": "after_code_change",
+      "actions": [
+        {
+          "type": "run_command",
+          "command": "npm run lint",
+          "description": "Run ESLint with zero warnings tolerance",
+          "working_directory": "spawn"
+        },
+        {
+          "type": "validate_syntax",
+          "description": "Check for basic syntax errors in modified files"
+        },
+        {
+          "type": "check_imports",
+          "description": "Verify all imports are valid and accessible"
+        }
+      ],
+      "auto_fix": true,
+      "show_results": true,
+      "fail_on_error": true,
+      "blocking": true
+    },
+    {
+      "name": "pre-pr-validation",
+      "description": "Comprehensive validation before any pull request to prevent CI failures",
+      "trigger": "before_git_commit",
+      "actions": [
+        {
+          "type": "run_command",
+          "command": "npm run lint",
+          "description": "Final lint check before commit",
+          "working_directory": "spawn"
+        },
+        {
+          "type": "run_command",
+          "command": "npm run lint:fix",
+          "description": "Auto-fix any fixable linting issues",
+          "working_directory": "spawn",
+          "condition": "has_package_json_with_lint_fix"
+        }
+      ],
+      "auto_fix": true,
+      "show_results": true,
+      "fail_on_error": true,
+      "blocking": true
+    },
+    {
+      "name": "eslint-error-prevention",
+      "description": "Prevent specific ESLint errors that cause CI failures",
+      "trigger": "after_code_change",
+      "actions": [
+        {
+          "type": "validate_custom",
+          "description": "Check for common ESLint issues",
+          "checks": [
+            {
+              "name": "no-unused-vars",
+              "pattern": "^\\s*(const|let|var|function|import)\\s+([a-zA-Z_$][a-zA-Z0-9_$]*).*$",
+              "message": "Check for unused variables and imports"
+            },
+            {
+              "name": "no-undef",
+              "pattern": "(process|__dirname|__filename|require|module|global)",
+              "message": "Check for undefined globals - ensure proper ESLint environment config"
+            },
+            {
+              "name": "react-unescaped-entities",
+              "pattern": "['\"].*['\"].*['\"]",
+              "message": "Check for unescaped entities in JSX - use &apos; instead of '"
+            },
+            {
+              "name": "no-prototype-builtins",
+              "pattern": "\\.hasOwnProperty\\(",
+              "message": "Use Object.prototype.hasOwnProperty.call() instead of direct hasOwnProperty"
+            }
+          ]
+        }
+      ],
+      "auto_fix": true,
+      "show_results": true
+    },
+    {
+      "name": "react-hooks-deps-check",
+      "description": "Check React hooks dependencies to prevent exhaustive-deps warnings",
+      "trigger": "after_code_change",
+      "file_patterns": ["*.jsx", "*.tsx"],
+      "actions": [
+        {
+          "type": "validate_custom",
+          "description": "Check useEffect dependencies",
+          "checks": [
+            {
+              "name": "exhaustive-deps",
+              "pattern": "useEffect\\(.*\\[.*\\]\\)",
+              "message": "Check useEffect dependencies - consider using useCallback for functions"
+            }
+          ]
+        }
+      ],
+      "auto_fix": false,
+      "show_results": true
+    }
+  ],
+  "global_settings": {
+    "always_check_syntax": true,
+    "auto_format_on_save": true,
+    "show_lint_warnings": true,
+    "lint_on_type": true,
+    "validate_before_ai_changes": true,
+    "prevent_ci_failures": true,
+    "working_directory": "spawn"
+  },
+  "project_specific": {
+    "javascript": {
+      "use_eslint": true,
+      "eslint_config": "./eslint.config.js",
+      "max_warnings": 0
+    },
+    "react": {
+      "check_jsx_syntax": true,
+      "validate_hooks": true,
+      "check_prop_types": false,
+      "escape_entities": true
+    },
+    "nodejs": {
+      "check_globals": true,
+      "validate_imports": true
+    },
+    "vite": {
+      "check_config": true,
+      "validate_imports": true
+    }
+  },
+  "ai_instructions": {
+    "post_change_checklist": [
+      "ALWAYS run 'npm run lint' after making any code modifications",
+      "Check for unused variables and imports - remove or comment them out",
+      "Verify all process, __dirname, __filename usage has proper Node.js globals",
+      "Escape apostrophes in JSX text using &apos; instead of '",
+      "Use Object.prototype.hasOwnProperty.call() instead of direct hasOwnProperty",
+      "For useEffect hooks, wrap function dependencies in useCallback",
+      "Ensure React component prop-types are properly defined or rule is disabled",
+      "Check that all imports are correctly resolved",
+      "Fix any ESLint errors immediately - don't let them reach GitHub CI",
+      "If auto-fixing is available, apply fixes and re-run lint check"
+    ],
+    "error_handling": {
+      "on_lint_error": "STOP and fix the linting error immediately. Run 'npm run lint' to verify fix.",
+      "on_syntax_error": "Highlight syntax issue and provide corrected code immediately",
+      "on_import_error": "Check import path and ensure module exists, fix immediately",
+      "on_ci_failure_risk": "Block the change and fix all issues before proceeding"
+    },
+    "prevention_strategy": {
+      "before_commit": "Run comprehensive lint check and fix all issues",
+      "after_code_change": "Immediate lint validation with auto-fix attempt",
+      "before_pr": "Full validation suite to ensure CI will pass"
+    }
+  }
+} 

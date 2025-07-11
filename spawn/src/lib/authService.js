@@ -111,6 +111,7 @@ export const authenticatedRequest = async (url, options = {}) => {
         response = await fetch(url, requestOptions);
       } catch (refreshError) {
         // If refresh fails, force logout
+        console.error('Token refresh failed:', refreshError);
         logout();
         throw new Error('Authentication expired. Please login again.');
       }
@@ -121,8 +122,8 @@ export const authenticatedRequest = async (url, options = {}) => {
     }
     
     return response;
-  } catch (error) {
-    console.error('Authenticated request error:', error);
-    throw error;
+  } catch (err) {
+    console.error('Authenticated request error:', err);
+    throw err;
   }
 }; 

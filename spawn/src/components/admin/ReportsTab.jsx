@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import {authenticatedRequest} from "@/lib/authService.js";
 
@@ -9,11 +9,7 @@ function ReportsTab() {
   const [filterReportType, setFilterReportType] = useState('');
   const [filterContentType, setFilterContentType] = useState('');
 
-  useEffect(() => {
-    fetchReports();
-  }, []);
-
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     setLoading(true);
     try {
       // Build query string with filters
@@ -42,7 +38,11 @@ function ReportsTab() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterReportType, filterContentType]);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
 
   const handleResolve = async (reportId, resolution) => {
     try {
