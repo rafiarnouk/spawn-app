@@ -20,7 +20,19 @@ function getApiPort() {
 }
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Plugin to serve Apple App Site Association file with correct content type
+    {
+      name: 'apple-app-site-association',
+      configureServer(server) {
+        server.middlewares.use('/.well-known/apple-app-site-association', (req, res, next) => {
+          res.setHeader('Content-Type', 'application/json');
+          next();
+        });
+      }
+    }
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

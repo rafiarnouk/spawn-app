@@ -11,7 +11,7 @@ import secondAppImg from '@/assets/app_promo/second.png';
 import thirdAppImg from '@/assets/app_promo/third.png';
 
 function Onboarding() {
-  const { inviteId } = useParams();
+  const { activityId } = useParams();
   const navigate = useNavigate();
   const [activityData, setActivityData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,10 +20,10 @@ function Onboarding() {
   useEffect(() => {
     document.title = "Spawn - You're In!";
     fetchActivityData();
-  }, [inviteId]);
+  }, [activityId]);
 
   const fetchActivityData = async () => {
-    if (!inviteId) {
+    if (!activityId) {
       setError('No activity ID provided');
       setLoading(false);
       return;
@@ -37,7 +37,7 @@ function Onboarding() {
       const apiBaseUrl = 'https://spawn-app-back-end-production.up.railway.app';
       
       const response = await fetch(
-        `${apiBaseUrl}/api/v1/activities/${inviteId}?isActivityExternalInvite=true`,
+        `${apiBaseUrl}/api/v1/activities/${activityId}?isActivityExternalInvite=true`,
         {
           method: 'GET',
           headers: {
@@ -126,7 +126,7 @@ function Onboarding() {
             <p className="text-gray-600">{error}</p>
           </div>
           <Button 
-            onClick={() => navigate(`/invite/${inviteId}`)} 
+            onClick={() => navigate(`/activity/${activityId}`)} 
             className="bg-spawn-purple hover:bg-spawn-purple/90 rounded-full py-2 px-6"
           >
             Go Back
@@ -142,7 +142,7 @@ function Onboarding() {
       <div className="flex items-center justify-between px-4 pt-12 pb-4">
         <button 
           className="text-gray-700"
-          onClick={() => navigate(`/invite/${inviteId}`)}
+                        onClick={() => navigate(`/activity/${activityId}`)}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

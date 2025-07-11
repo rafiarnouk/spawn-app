@@ -1,0 +1,29 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "GUW483PXY6.danielagapov.Spawn-App-iOS-SwiftUI"
+        ],
+        "components": [
+          {
+            "/": "/activity/*",
+            "comment": "Activity invite links"
+          },
+          {
+            "/": "/invite/*",
+            "comment": "Legacy invite links"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "GUW483PXY6.danielagapov.Spawn-App-iOS-SwiftUI"
+    ]
+  },
+  "appclips": {
+    "apps": []
+  }
+} 

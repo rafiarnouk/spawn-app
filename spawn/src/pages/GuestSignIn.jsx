@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 function GuestSignIn() {
-  const { inviteId } = useParams();
+  const { activityId } = useParams();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -25,10 +25,10 @@ function GuestSignIn() {
       // Use production backend URL
       const apiBaseUrl = 'https://spawn-app-back-end-production.up.railway.app';
       
-      console.log(`Attempting to join activity ${inviteId} with:`, { name, email });
+      console.log(`Attempting to join activity ${activityId} with:`, { name, email });
       
       // Call the backend API to register the guest for the activity
-      const response = await fetch(`${apiBaseUrl}/api/v1/activities/${inviteId}/join`, {
+              const response = await fetch(`${apiBaseUrl}/api/v1/activities/${activityId}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ function GuestSignIn() {
         console.log('Successfully joined activity:', result);
         
         // Redirect to the onboarding page after successful sign-in
-        navigate(`/invite/${inviteId}/onboarding`);
+                  navigate(`/activity/${activityId}/onboarding`);
       } else {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.message || `Failed to join activity (${response.status})`;
@@ -73,7 +73,7 @@ function GuestSignIn() {
       <div className="max-w-md w-full bg-white rounded-3xl shadow-lg overflow-hidden mx-auto">
         {/* Back button */}
         <div className="p-6 pb-2">
-          <Link to={`/invite/${inviteId}`} className="text-gray-500">
+          <Link to={`/activity/${activityId}`} className="text-gray-500">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
