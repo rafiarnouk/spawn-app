@@ -1,0 +1,86 @@
+{
+  "rules": [
+    {
+      "name": "auto-lint-check",
+      "description": "Automatically run linting and syntax error checks after any code changes",
+      "trigger": "after_code_change",
+      "actions": [
+        {
+          "type": "run_command",
+          "command": "npm run lint",
+          "description": "Run ESLint to check for linting errors"
+        },
+        {
+          "type": "run_command", 
+          "command": "npx tsc --noEmit --skipLibCheck",
+          "description": "Run TypeScript compiler to check for syntax errors without emitting files",
+          "condition": "has_typescript_files"
+        }
+      ],
+      "auto_fix": true,
+      "show_results": true,
+      "fail_on_error": false
+    },
+    {
+      "name": "pre-commit-validation",
+      "description": "Comprehensive validation before any file changes are committed",
+      "trigger": "before_file_save",
+      "actions": [
+        {
+          "type": "validate_syntax",
+          "description": "Check for basic syntax errors in modified files"
+        },
+        {
+          "type": "check_imports",
+          "description": "Verify all imports are valid and accessible"
+        },
+        {
+          "type": "run_command",
+          "command": "npm run lint:fix",
+          "description": "Attempt to auto-fix linting issues",
+          "condition": "has_package_json_with_lint_fix"
+        }
+      ],
+      "auto_fix": true,
+      "show_results": true
+    }
+  ],
+  "global_settings": {
+    "always_check_syntax": true,
+    "auto_format_on_save": true,
+    "show_lint_warnings": true,
+    "lint_on_type": true,
+    "validate_before_ai_changes": true
+  },
+  "project_specific": {
+    "javascript": {
+      "use_eslint": true,
+      "eslint_config": "./eslint.config.js"
+    },
+    "react": {
+      "check_jsx_syntax": true,
+      "validate_hooks": true,
+      "check_prop_types": true
+    },
+    "vite": {
+      "check_config": true,
+      "validate_imports": true
+    }
+  },
+  "ai_instructions": {
+    "post_change_checklist": [
+      "Always run linting checks after making any code modifications",
+      "Verify syntax is correct in all modified files", 
+      "Check that all imports and dependencies are properly resolved",
+      "Ensure React components follow proper JSX syntax",
+      "Validate that any new code follows the project's ESLint configuration",
+      "Report any linting errors or warnings found and offer to fix them",
+      "If auto-fixing is available, ask permission before applying fixes"
+    ],
+    "error_handling": {
+      "on_lint_error": "Report the specific error and line number, offer to fix",
+      "on_syntax_error": "Highlight the syntax issue and provide corrected code",
+      "on_import_error": "Check if the import path is correct and the module exists"
+    }
+  }
+} 
