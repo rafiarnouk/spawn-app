@@ -17,6 +17,7 @@ function ActivityInvite() {
   const [activityData, setActivityData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isOpeningApp, setIsOpeningApp] = useState(false);
 
   // Determine which ID to use (activityId from new route or inviteId from legacy route)
   const currentActivityId = activityId || inviteId;
@@ -87,8 +88,50 @@ function ActivityInvite() {
   };
 
   const handleSpawnIn = () => {
-    // Redirect to guest sign-in page with the activity ID
-    navigate(`/invite/${currentActivityId}/sign-in`);
+    // Try to open in the app first, fallback handled inside the function
+    tryOpenInApp();
+  };
+
+  const tryOpenInApp = () => {
+    if (!currentActivityId) return false;
+    
+    setIsOpeningApp(true);
+    
+    // Create the deep link URL
+    const deepLinkUrl = `spawn://activity/${currentActivityId}`;
+    
+    try {
+      // Attempt to open the app
+      window.location.href = deepLinkUrl;
+      
+      // Set a timeout to check if the app opened
+      const timeout = setTimeout(() => {
+        // If we're still here after a short delay, the app probably isn't installed
+        console.log('App not detected, falling back to web experience');
+        setIsOpeningApp(false);
+        // Navigate to web experience
+        navigate(`/invite/${currentActivityId}/sign-in`);
+      }, 2000);
+      
+      // Listen for page visibility change to detect if app opened
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+          // Page became hidden, likely because app opened
+          clearTimeout(timeout);
+          setIsOpeningApp(false);
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        }
+      };
+      
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      
+      // Return true to indicate we attempted app redirect
+      return true;
+    } catch (error) {
+      console.log('Error trying to open app:', error);
+      setIsOpeningApp(false);
+      return false;
+    }
   };
 
   const formatDateTime = (dateTimeString) => {
@@ -361,10 +404,11 @@ function ActivityInvite() {
         {/* Action button */}
         <div className="px-6 pb-8 text-center">
           <Button 
-            className="w-full bg-spawn-purple hover:bg-spawn-purple/90 rounded-full py-6 text-white text-lg font-medium"
+            className="w-full bg-spawn-purple hover:bg-spawn-purple/90 rounded-full py-6 text-white text-lg font-medium disabled:opacity-50"
             onClick={handleSpawnIn}
+            disabled={isOpeningApp}
           >
-            Spawn In!
+            {isOpeningApp ? 'Opening Spawn...' : 'Spawn In!'}
           </Button>
           
           <p className="text-sm text-gray-600 mt-4 mb-8">
