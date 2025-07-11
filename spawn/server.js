@@ -22,7 +22,16 @@ const MAX_PORT_ATTEMPTS = 10;
 app.use(cors());
 app.use(bodyParser.json());
 
-// API routes
+// Health check endpoint
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    message: 'Spawn local auth server is running'
+  });
+});
+
+// Admin authentication endpoint
 app.post('/api/auth', (req, res) => {
   try {
     const { password } = req.body;
@@ -49,7 +58,11 @@ app.post('/api/auth', (req, res) => {
 // Function to try starting the server on different ports if needed
 function startServer(port, maxAttempts) {
   const server = app.listen(port, () => {
-    console.log(`API server running at http://localhost:${port}`);
+    console.log(`Local auth server running at http://localhost:${port}`);
+    console.log(`Available endpoints:`);
+    console.log(`  - GET  /api/v1/health`);
+    console.log(`  - POST /api/auth`);
+    console.log(`Note: Activity invite APIs will use the production backend.`);
     
     // Write the actual port to a file for Vite to read
     fs.writeFileSync('./.api-port', port.toString());

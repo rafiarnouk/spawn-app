@@ -22,16 +22,43 @@ function GuestSignIn() {
     }
     
     try {
-      // In a real app, you would send a request to the server
-      console.log("Guest sign-in with:", { name, email, inviteId });
+      // Use production backend URL
+      const apiBaseUrl = 'https://spawn-app-back-end-production.up.railway.app';
       
-      // Mock successful sign-in
-      // Redirect to the onboarding page after successful sign-in
-      // This would be replaced with actual logic in a real app
-      navigate(`/invite/${inviteId}/onboarding`); // Redirect to onboarding with inviteId
+      console.log(`Attempting to join activity ${inviteId} with:`, { name, email });
+      
+      // Call the backend API to register the guest for the activity
+      const response = await fetch(`${apiBaseUrl}/api/v1/activities/${inviteId}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim()
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Successfully joined activity:', result);
+        
+        // Redirect to the onboarding page after successful sign-in
+        navigate(`/invite/${inviteId}/onboarding`);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || `Failed to join activity (${response.status})`;
+        console.error('Failed to join activity:', errorData);
+        alert(errorMessage);
+      }
     } catch (error) {
-      console.error('Error signing in:', error);
-      alert('An error occurred. Please try again.');
+      console.error('Network error joining activity:', error);
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        alert('Unable to connect to the server. Please check your internet connection and try again.');
+      } else {
+        alert('An error occurred while joining the activity. Please try again.');
+      }
     }
   };
 

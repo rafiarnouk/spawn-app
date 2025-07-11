@@ -37,8 +37,10 @@ function ActivityInvite() {
       setLoading(true);
       setError(null);
       
-      // Use environment variable for API URL, fallback to the production URL
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://spawn-app-back-end-production.up.railway.app';
+      // Use production backend URL
+      const apiBaseUrl = 'https://spawn-app-back-end-production.up.railway.app';
+      
+      console.log(`Fetching activity data from: ${apiBaseUrl}/api/v1/activities/${currentActivityId}`);
       
       const response = await fetch(
         `${apiBaseUrl}/api/v1/activities/${currentActivityId}?isActivityExternalInvite=true`,
@@ -52,22 +54,33 @@ function ActivityInvite() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Received activity data:', data);
         
         // Validate and map the data
         if (isValidActivityInvite(data)) {
           const mappedData = mapBackendToActivityInvite(data);
           setActivityData(mappedData);
         } else {
+          console.error('Invalid activity data structure:', data);
           setError('Invalid activity data received');
         }
       } else if (response.status === 404) {
+        console.error('Activity not found:', currentActivityId);
         setError('Activity not found or no longer available');
+      } else if (response.status === 401) {
+        console.error('Unauthorized access to activity:', currentActivityId);
+        setError('This invite link may have expired or is not publicly accessible');
+      } else {
+        console.error('Failed to fetch activity:', response.status, response.statusText);
+        setError(`Failed to load activity details (${response.status})`);
+      }
+    } catch (err) {
+      console.error('Network error fetching activity:', err);
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setError('Unable to connect to the server. Please check your internet connection or try again later.');
       } else {
         setError('Failed to load activity details');
       }
-    } catch (err) {
-      console.error('Error fetching activity:', err);
-      setError('Failed to load activity details');
     } finally {
       setLoading(false);
     }

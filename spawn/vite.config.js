@@ -28,8 +28,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Proxy API requests to our local Express server
-      '/api': {
+      // Proxy only admin auth requests to our local Express server
+      '/api/auth': {
         target: `http://localhost:${getApiPort()}`,
         changeOrigin: true,
       }
