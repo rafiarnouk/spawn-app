@@ -109,8 +109,9 @@ export const authenticatedRequest = async (url, options = {}) => {
         // Retry with new token
         requestOptions.headers.Authorization = localStorage.getItem('accessToken');
         response = await fetch(url, requestOptions);
-      } catch (error) {
+      } catch (refreshError) {
         // If refresh fails, force logout
+        console.error('Token refresh failed:', refreshError);
         logout();
         throw new Error('Authentication expired. Please login again.');
       }
