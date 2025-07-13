@@ -12,13 +12,14 @@ import secondAppImg from '@/assets/app_promo/second.png';
 import thirdAppImg from '@/assets/app_promo/third.png';
 
 function ProfileInvite() {
-  const { profileId } = useParams();
+  const { profileId, shareCode } = useParams();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Use the profileId from the URL parameters
-  const currentProfileId = profileId;
+  // Use either profileId (UUID) or shareCode (share-code) from URL parameters
+  const currentProfileId = profileId || shareCode;
+  const isShareCode = !!shareCode;
 
   const fetchProfileData = useCallback(async () => {
     if (!currentProfileId) {
@@ -34,17 +35,23 @@ function ProfileInvite() {
       // Use production backend URL
       const apiBaseUrl = 'https://spawn-app-back-end-production.up.railway.app';
       
-      console.log(`Fetching profile data from: ${apiBaseUrl}/api/v1/users/${currentProfileId}`);
+      let fetchUrl;
+      if (isShareCode) {
+        // Use share code endpoint
+        fetchUrl = `${apiBaseUrl}/api/v1/share/profile/${currentProfileId}`;
+        console.log(`Fetching profile data via share code from: ${fetchUrl}`);
+      } else {
+        // Use legacy UUID endpoint
+        fetchUrl = `${apiBaseUrl}/api/v1/users/${currentProfileId}?isProfileExternalInvite=true`;
+        console.log(`Fetching profile data via UUID from: ${fetchUrl}`);
+      }
       
-      const response = await fetch(
-        `${apiBaseUrl}/api/v1/users/${currentProfileId}?isProfileExternalInvite=true`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(fetchUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -54,7 +61,10 @@ function ProfileInvite() {
         setProfileData(data);
       } else if (response.status === 404) {
         console.error('Profile not found:', currentProfileId);
-        setError('Profile not found or no longer available');
+        const errorMessage = isShareCode 
+          ? 'This profile link has expired or is no longer available'
+          : 'Profile not found or no longer available';
+        setError(errorMessage);
       } else if (response.status === 401) {
         console.error('Unauthorized access to profile:', currentProfileId);
         setError('This profile link may have expired or is not publicly accessible');

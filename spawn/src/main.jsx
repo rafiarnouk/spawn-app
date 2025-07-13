@@ -29,9 +29,16 @@ createRoot(document.getElementById('root')).render(
             </PrivateRoute>
           } 
         />
+        {/* Legacy UUID-based routes */}
         <Route path="/activity/:activityId" element={<ActivityInvite />} />
         <Route path="/activity/:activityId/sign-in" element={<GuestSignIn />} />
         <Route path="/profile/:profileId" element={<ProfileInvite />} />
+        
+        {/* New share code routes */}
+        <Route path="/a/:shareCode" element={<ActivityInvite />} />
+        <Route path="/a/:shareCode/sign-in" element={<GuestSignIn />} />
+        <Route path="/p/:shareCode" element={<ProfileInvite />} />
+        
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/activity/:activityId/onboarding" element={<Onboarding />} />
       </Routes>

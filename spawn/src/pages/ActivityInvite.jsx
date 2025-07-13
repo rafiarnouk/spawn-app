@@ -13,14 +13,15 @@ import secondAppImg from '@/assets/app_promo/second.png';
 import thirdAppImg from '@/assets/app_promo/third.png';
 
 function ActivityInvite() {
-  const { activityId } = useParams();
+  const { activityId, shareCode } = useParams();
   const navigate = useNavigate();
   const [activityData, setActivityData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Use the activityId from the URL parameters
-  const currentActivityId = activityId;
+  // Use either activityId (UUID) or shareCode (share-code) from URL parameters
+  const currentActivityId = activityId || shareCode;
+  const isShareCode = !!shareCode;
 
   const fetchActivityData = useCallback(async () => {
     if (!currentActivityId) {
@@ -36,17 +37,23 @@ function ActivityInvite() {
       // Use production backend URL
       const apiBaseUrl = 'https://spawn-app-back-end-production.up.railway.app';
       
-      console.log(`Fetching activity data from: ${apiBaseUrl}/api/v1/activities/${currentActivityId}`);
+      let fetchUrl;
+      if (isShareCode) {
+        // Use share code endpoint
+        fetchUrl = `${apiBaseUrl}/api/v1/share/activity/${currentActivityId}`;
+        console.log(`Fetching activity data via share code from: ${fetchUrl}`);
+      } else {
+        // Use legacy UUID endpoint
+        fetchUrl = `${apiBaseUrl}/api/v1/activities/${currentActivityId}?isActivityExternalInvite=true`;
+        console.log(`Fetching activity data via UUID from: ${fetchUrl}`);
+      }
       
-      const response = await fetch(
-        `${apiBaseUrl}/api/v1/activities/${currentActivityId}?isActivityExternalInvite=true`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(fetchUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -62,7 +69,10 @@ function ActivityInvite() {
         }
       } else if (response.status === 404) {
         console.error('Activity not found:', currentActivityId);
-        setError('Activity not found or no longer available');
+        const errorMessage = isShareCode 
+          ? 'This activity link has expired or is no longer available'
+          : 'Activity not found or no longer available';
+        setError(errorMessage);
       } else if (response.status === 401) {
         console.error('Unauthorized access to activity:', currentActivityId);
         setError('This invite link may have expired or is not publicly accessible');
@@ -90,9 +100,12 @@ function ActivityInvite() {
   const handleSpawnIn = async () => {
     // Use the new utility function to handle app installation detection
     await handleActivityInvite(currentActivityId, () => {
-      // Navigate to guest sign-in page with the activity ID
+      // Navigate to guest sign-in page with the activity ID or share code
       // Universal Links will automatically open the app if installed
-      navigate(`/activity/${currentActivityId}/sign-in`);
+      const signInPath = isShareCode 
+        ? `/a/${currentActivityId}/sign-in`
+        : `/activity/${currentActivityId}/sign-in`;
+      navigate(signInPath);
     });
   };
 

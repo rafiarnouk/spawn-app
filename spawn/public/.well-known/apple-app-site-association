@@ -8,11 +8,19 @@
         "components": [
           {
             "/": "/activity/*",
-            "comment": "Activity invite links"
+            "comment": "Activity invite links (legacy UUID)"
           },
           {
             "/": "/profile/*",
-            "comment": "Profile share links"
+            "comment": "Profile share links (legacy UUID)"
+          },
+          {
+            "/": "/a/*",
+            "comment": "Activity invite links (share code)"
+          },
+          {
+            "/": "/p/*",
+            "comment": "Profile share links (share code)"
           }
         ]
       }
