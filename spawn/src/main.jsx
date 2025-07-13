@@ -6,6 +6,7 @@ import App from './App.jsx'
 import Admin from './pages/Admin.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import ActivityInvite from './pages/ActivityInvite.jsx'
+import ProfileInvite from './pages/ProfileInvite.jsx'
 import GuestSignIn from './pages/GuestSignIn.jsx'
 import Login from './pages/Login.jsx'
 import Onboarding from './pages/Onboarding.jsx'
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')).render(
         />
         <Route path="/activity/:activityId" element={<ActivityInvite />} />
         <Route path="/activity/:activityId/sign-in" element={<GuestSignIn />} />
+        <Route path="/profile/:profileId" element={<ProfileInvite />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/activity/:activityId/onboarding" element={<Onboarding />} />
       </Routes>

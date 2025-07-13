@@ -11,6 +11,10 @@
             "comment": "Activity invite links"
           },
           {
+            "/": "/profile/*",
+            "comment": "Profile share links"
+          },
+          {
             "/": "/invite/*",
             "comment": "Legacy invite links"
           }

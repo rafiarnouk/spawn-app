@@ -80,6 +80,61 @@ export const checkSpawnAppInstalled = (activityId) => {
 };
 
 /**
+ * Check if the Spawn app is installed by attempting to open a custom URL scheme for profiles
+ * @param {string} profileId - The profile ID to deep link to
+ * @returns {Promise<boolean>} - Returns true if app is installed, false otherwise
+ */
+export const checkSpawnAppInstalledForProfile = (profileId) => {
+  return new Promise((resolve) => {
+    if (!isAppleDevice()) {
+      resolve(false);
+      return;
+    }
+
+    // Create the deep link URL
+    const deepLinkUrl = `spawn://profile/${profileId}`;
+    
+    // Set up a timeout to check if the app opened
+    const checkTimeout = setTimeout(() => {
+      // If we're still here after the timeout, the app probably isn't installed
+      resolve(false);
+    }, 2000);
+    
+    // Listen for page visibility changes (indicates app might have opened)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        clearTimeout(checkTimeout);
+        resolve(true);
+      }
+    };
+    
+    // Listen for blur events (indicates app might have opened)
+    const handleBlur = () => {
+      clearTimeout(checkTimeout);
+      resolve(true);
+    };
+    
+    // Add event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+    
+    // Clean up event listeners after timeout
+    setTimeout(() => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+    }, 2500);
+    
+    // Try to open the app
+    try {
+      window.location.href = deepLinkUrl;
+    } catch {
+      clearTimeout(checkTimeout);
+      resolve(false);
+    }
+  });
+};
+
+/**
  * Open the App Store for the Spawn app (or placeholder app)
  */
 export const openAppStore = () => {
@@ -109,6 +164,33 @@ export const handleActivityInvite = async (activityId, navigateCallback) => {
 
   // On Apple devices, check if app is installed
   const isAppInstalled = await checkSpawnAppInstalled(activityId);
+  
+  if (!isAppInstalled) {
+    // App not installed, open App Store
+    openAppStore();
+  } else {
+    // App is installed, it should have opened via the deep link
+    // If for some reason it didn't open, fall back to web
+    setTimeout(() => {
+      navigateCallback();
+    }, 1000);
+  }
+};
+
+/**
+ * Handle profile invite click with app installation detection
+ * @param {string} profileId - The profile ID
+ * @param {Function} navigateCallback - Navigation callback for web fallback
+ */
+export const handleProfileInvite = async (profileId, navigateCallback) => {
+  if (!isAppleDevice()) {
+    // Not an Apple device, proceed with normal web flow
+    navigateCallback();
+    return;
+  }
+
+  // On Apple devices, check if app is installed
+  const isAppInstalled = await checkSpawnAppInstalledForProfile(profileId);
   
   if (!isAppInstalled) {
     // App not installed, open App Store

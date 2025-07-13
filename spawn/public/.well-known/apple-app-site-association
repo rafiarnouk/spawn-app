@@ -9,6 +9,10 @@
           {
             "/": "/activity/*",
             "comment": "Activity invite links"
+          },
+          {
+            "/": "/profile/*",
+            "comment": "Profile share links"
           }
         ]
       }
