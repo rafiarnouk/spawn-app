@@ -90,7 +90,7 @@ function ActivityInvite() {
     } finally {
       setLoading(false);
     }
-  }, [currentActivityId]);
+  }, [currentActivityId, isShareCode]);
 
   useEffect(() => {
     document.title = "Spawn - You've Been Invited!";

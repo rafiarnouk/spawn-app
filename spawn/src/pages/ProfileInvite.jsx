@@ -82,7 +82,7 @@ function ProfileInvite() {
     } finally {
       setLoading(false);
     }
-  }, [currentProfileId]);
+  }, [currentProfileId, isShareCode]);
 
   useEffect(() => {
     document.title = "Spawn - Check Out This Profile!";
@@ -241,7 +241,7 @@ function ProfileInvite() {
 
           <div className="text-xs text-gray-400">
             <p>
-              Don't have the app yet?{" "}
+              Don&apos;t have the app yet?{" "}
               <button 
                 onClick={openAppStore}
                 className="text-spawn-purple font-medium underline"
