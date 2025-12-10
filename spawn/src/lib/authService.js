@@ -47,25 +47,26 @@ export const refreshAccessToken = async () => {
       throw new Error('No refresh token available');
     }
     
-    const response = await axios.get(`${API_URL}/api/v1/auth/refresh-token`, {
-      method: 'POST',
+    const response = await axios.post(`${API_URL}/api/v1/auth/refresh-token`, null, {
       headers: {
         'Authorization': refreshToken
       }
     });
     
-    if (!response.ok) {
+    if (response.status !== 200) {
       // If refresh fails, clear auth data
       logout();
       throw new Error('Token refresh failed');
     }
     
-    const newAccessToken = response.headers.get('Authorization');
+    // Axios stores headers in response.headers (lowercase object keys)
+    const newAccessToken = response.headers['authorization'] || response.headers['Authorization'];
     localStorage.setItem('accessToken', newAccessToken);
     
     return newAccessToken;
   } catch (error) {
     console.error('Token refresh error:', error);
+    logout();
     throw error;
   }
 };
