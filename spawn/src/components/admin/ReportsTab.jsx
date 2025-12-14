@@ -45,6 +45,11 @@ function ReportsTab() {
   }, [fetchReports]);
 
   const handleResolve = async (reportId, resolution) => {
+    if (!resolution) {
+      setError('Please select a resolution action');
+      return;
+    }
+    
     try {
       await authenticatedRequest(`${import.meta.env.VITE_API_URL}/api/v1/reports/${reportId}?resolution=${resolution}`,
           {
@@ -159,22 +164,29 @@ function ReportsTab() {
                   <td className="px-6 py-4">{report.reason}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      report.status === 'RESOLVED' ? 'bg-green-100 text-green-800' : 
-                      report.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 
-                      'bg-yellow-100 text-yellow-800'
+                      report.status === 'BAN' ? 'bg-red-100 text-red-800' : 
+                      report.status === 'SUSPENSION' ? 'bg-orange-100 text-orange-800' : 
+                      report.status === 'WARN' ? 'bg-yellow-100 text-yellow-800' : 
+                      report.status === 'FALSE' ? 'bg-gray-100 text-gray-800' : 
+                      'bg-blue-100 text-blue-800'
                     }`}>
                       {report.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     {report.status === 'PENDING' && (
-                      <div className="flex space-x-2">
-                        <Button size="sm" onClick={() => handleResolve(report.id, 'RESOLVED')}>
-                          Approve
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleResolve(report.id, 'REJECTED')}>
-                          Reject
-                        </Button>
+                      <div className="flex flex-col space-y-2">
+                        <select 
+                          className="border rounded p-1 text-sm"
+                          onChange={(e) => handleResolve(report.id, e.target.value)}
+                          defaultValue=""
+                        >
+                          <option value="" disabled>Select Action</option>
+                          <option value="FALSE">Mark as False Report</option>
+                          <option value="WARN">Issue Warning</option>
+                          <option value="SUSPENSION">Suspend User</option>
+                          <option value="BAN">Ban User</option>
+                        </select>
                       </div>
                     )}
                     <Button size="sm" variant="destructive" onClick={() => handleDelete(report.id)} className="mt-2">
