@@ -24,7 +24,7 @@ function App() {
       hasSubscribedToNewsletter: isSubscribed,
     }
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/beta-access-sign-up`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

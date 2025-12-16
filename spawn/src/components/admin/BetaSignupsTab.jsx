@@ -21,7 +21,7 @@ function BetaSignupsTab() {
     setLoading(true);
     try {
       const response = await authenticatedRequest(
-        `${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp/records`
+        `${import.meta.env.VITE_API_URL}/api/v1/beta-access-sign-up/records`
       );
       const data = await response.json();
       setSignups(data);
@@ -40,7 +40,7 @@ function BetaSignupsTab() {
   const updateEmailedStatus = async (id, hasBeenEmailed) => {
     try {
       await authenticatedRequest(
-        `${import.meta.env.VITE_API_URL}/api/v1/betaAccessSignUp/${id}/emailed`,
+        `${import.meta.env.VITE_API_URL}/api/v1/beta-access-sign-up/${id}/emailed`,
         {
           method: 'PUT',
           headers: {

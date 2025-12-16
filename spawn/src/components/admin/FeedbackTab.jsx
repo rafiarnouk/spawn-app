@@ -171,7 +171,7 @@ function FeedbackTab() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this feedback?')) {
       try {
-        await authenticatedRequest(`${import.meta.env.VITE_API_URL}/api/v1/feedback/delete/${id}`, {method: "DELETE"});
+        await authenticatedRequest(`${import.meta.env.VITE_API_URL}/api/v1/feedback/${id}`, {method: "DELETE"});
         await fetchFeedbacks();
         toast({
           title: "Feedback deleted",
