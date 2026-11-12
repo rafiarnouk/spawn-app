@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.danielagapov.spawn",
+      "sha256_cert_fingerprints": [
+        "94:E3:27:8A:31:6E:92:33:0A:5C:9C:76:2B:89:0B:35:65:41:69:E7:70:C2:CF:4B:CA:86:5E:D3:9E:C3:BD:53"
+      ]
+    }
+  }
+]

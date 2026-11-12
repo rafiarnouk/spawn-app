@@ -10,6 +10,7 @@ import ProfileInvite from './pages/ProfileInvite.jsx'
 import GuestSignIn from './pages/GuestSignIn.jsx'
 import Login from './pages/Login.jsx'
 import Onboarding from './pages/Onboarding.jsx'
+import DeleteAccount from './pages/DeleteAccount.jsx'
 import PrivateRoute from './components/PrivateRoute.jsx'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -40,6 +41,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/p/:shareCode" element={<ProfileInvite />} />
         
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
         <Route path="/activity/:activityId/onboarding" element={<Onboarding />} />
       </Routes>
     </BrowserRouter>
