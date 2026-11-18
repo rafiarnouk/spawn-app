@@ -11,6 +11,7 @@ import GuestSignIn from './pages/GuestSignIn.jsx'
 import Login from './pages/Login.jsx'
 import Onboarding from './pages/Onboarding.jsx'
 import DeleteAccount from './pages/DeleteAccount.jsx'
+import ChildSafety from './pages/ChildSafety.jsx'
 import PrivateRoute from './components/PrivateRoute.jsx'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -42,6 +43,7 @@ createRoot(document.getElementById('root')).render(
         
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/delete-account" element={<DeleteAccount />} />
+        <Route path="/child-safety" element={<ChildSafety />} />
         <Route path="/activity/:activityId/onboarding" element={<Onboarding />} />
       </Routes>
     </BrowserRouter>
