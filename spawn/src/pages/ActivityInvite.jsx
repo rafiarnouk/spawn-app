@@ -12,6 +12,8 @@ import firstAppImg from '@/assets/app_promo/first.png';
 import secondAppImg from '@/assets/app_promo/second.png';
 import thirdAppImg from '@/assets/app_promo/third.png';
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function ActivityInvite() {
   const { activityId, shareCode } = useParams();
   const navigate = useNavigate();
@@ -21,7 +23,9 @@ function ActivityInvite() {
 
   // Use either activityId (UUID) or shareCode (share-code) from URL parameters
   const currentActivityId = activityId || shareCode;
-  const isShareCode = !!shareCode;
+  // The app shares /activity/<share-code> links, which land on the /activity/:activityId route,
+  // so anything that isn't a UUID is a share code.
+  const isShareCode = !!shareCode || !UUID_PATTERN.test(currentActivityId || '');
 
   const fetchActivityData = useCallback(async () => {
     if (!currentActivityId) {

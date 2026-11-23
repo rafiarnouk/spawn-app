@@ -11,6 +11,8 @@ import firstAppImg from '@/assets/app_promo/first.png';
 import secondAppImg from '@/assets/app_promo/second.png';
 import thirdAppImg from '@/assets/app_promo/third.png';
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function ProfileInvite() {
   const { profileId, shareCode } = useParams();
   const [profileData, setProfileData] = useState(null);
@@ -19,7 +21,9 @@ function ProfileInvite() {
 
   // Use either profileId (UUID) or shareCode (share-code) from URL parameters
   const currentProfileId = profileId || shareCode;
-  const isShareCode = !!shareCode;
+  // The app shares /profile/<share-code> links, which land on the /profile/:profileId route,
+  // so anything that isn't a UUID is a share code.
+  const isShareCode = !!shareCode || !UUID_PATTERN.test(currentProfileId || '');
 
   const fetchProfileData = useCallback(async () => {
     if (!currentProfileId) {
